@@ -49,7 +49,7 @@ Le script écrit directement dans `Ressource/pokemon.json` (compte quelques minu
 
 À refaire quand de nouveaux Pokémon sortent (par exemple une nouvelle génération). La génération est complète à chaque fois et il n'y a pas de mise à jour automatique.
 
-Pour chaque Pokémon, le fichier contient : numéro, nom français, génération, types, talents, taille, poids, total des stats, description du Pokédex, stade d'évolution, images (normale et shiny) et cri.
+Pour chaque Pokémon, le fichier contient : numéro, nom français, génération, types, talents, taille, poids, total des stats, description du Pokédex, stade d'évolution, indicateur full évolué (`final`), images (normale et shiny) et cri.
 
 Le fichier contient aussi toutes les formes alternatives (Méga, régionales, Gigamax, etc.), chacune comme une entrée à part avec son propre nom, ses types et ses stats. Le champ `forme` donne sa catégorie (`mega`, `primal`, `gmax`, `alola`, `galar`, `hisui`, `paldea` ou `autre`) et `base` le nom du Pokémon de base. Pour un Pokémon de base, `forme` vaut `null`. `id` est unique et `num` est le numéro du Pokédex.
 
@@ -89,7 +89,6 @@ Les meilleurs scores sont stockés dans le `localStorage` du navigateur, via `Co
 
 ## À faire
 
-- Remplacer le lien du Starter à l'aveugle dans `index.html` (actuellement `#`).
 - Comptes utilisateurs avec une base de données.
 - Attaques dans le jeu « Caractéristiques » (demande beaucoup d'appels à PokéAPI).
 

@@ -4,10 +4,10 @@
 <body><main>
 <a class="retour" href="reflexion.html">Retour à Réflexion</a>
 <h1>Pokédle</h1>
-<p class="intro">Trouve le Pokémon mystère en 8 essais. Vert : identique. Jaune : ce type est présent sur l'autre emplacement. Une flèche indique si la valeur cherchée est plus haute ou plus basse.</p>
-<div class="saisie"><input id="rep" list="noms" autocomplete="off" placeholder="Nom du Pokémon"><button id="ok" type="button">Proposer</button></div>
+<p class="intro">Trouve le Pokémon mystère, sans limite d'essais : moins tu en utilises, plus ton score est élevé. Vert : identique. Jaune : ce type est présent sur l'autre emplacement. Une flèche indique si la valeur cherchée est plus haute ou plus basse.</p>
+<div class="saisie"><input id="rep" list="noms" autocomplete="off" placeholder="Nom du Pokémon"><button id="ok" type="button">Proposer</button><button id="abandon" type="button" class="sec">Abandonner</button></div>
 <p id="info" aria-live="polite"></p>
-<div style="overflow-x:auto"><table class="tab"><thead><tr><th>Pokémon</th><th>Type 1</th><th>Type 2</th><th>Gén.</th><th>Stade</th><th>Taille</th><th>Poids</th></tr></thead><tbody id="lignes"></tbody></table></div>
+<div style="overflow-x:auto"><table class="tab"><thead><tr><th>Pokémon</th><th>Type 1</th><th>Type 2</th><th>Gén.</th><th>Stade</th><th>Full évolué</th><th>Taille</th><th>Poids</th></tr></thead><tbody id="lignes"></tbody></table></div>
 <datalist id="noms"></datalist>
 </main>
 <script src="../Ressource/core.js"></script><script src="../Ressource/pokedle.js"></script>
