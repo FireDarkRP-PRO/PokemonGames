@@ -3,7 +3,7 @@
 (async () => {
   const mode = document.body.dataset.mode, $ = id => document.getElementById(id);
   const N = 10, ESSAIS = 3, NIV = [8, 16, 32, 64];
-  const seed = Number(new URLSearchParams(location.search).get('seed')) || Date.now() % 1e9;
+  let seed = Core.seed(), dejaJoue = false;
   let data;
   try { data = await Core.load(); }
   catch { $('media').textContent = 'pokemon.json introuvable : lance outils/generer_pokemon.py, puis commit Ressource/pokemon.json.'; return; }
@@ -22,6 +22,8 @@
   };
 
   function start() {
+    if (dejaJoue) seed = Date.now() % 1e9; // chaque nouvelle partie = nouvelles questions
+    dejaJoue = true;
     const g = Number($('gen').value);
     qs = Core.pick(data.filter(p => jouable(p) && (!g || p.gen === g)), N, Core.rng(seed + g));
     i = 0; score = 0; question();
