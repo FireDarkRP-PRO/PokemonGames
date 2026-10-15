@@ -9,7 +9,7 @@ Site de mini-jeux Pokémon, 100 % statique, hébergé sur GitHub Pages. Chaque j
 | Deviner | Silhouette, cri, image pixelisée, description du Pokédex, caractéristiques |
 | Réflexion | Pokédle, plus ou moins, efficacité des types, intrus |
 | Autre | Memory, « Lequel est le shiny ? », lien vers le Starter à l'aveugle |
-| Multijoueur | Salon à code (PeerJS) : tout le monde joue aux mêmes questions, scores en direct |
+| Multijoueur | Duel à deux dans un salon à code (PeerJS) : chacun son tour, le premier qui trouve gagne |
 
 ## Arborescence
 
@@ -71,17 +71,26 @@ Dans les réglages du dépôt GitHub : *Pages*, puis branche `main`, dossier rac
 
 ## Multijoueur
 
-- L'hôte crée un salon et partage le code à 5 caractères. Les autres le saisissent pour rejoindre.
-- L'hôte choisit le jeu. Une graine aléatoire (`?seed=`) est envoyée à tous, qui reçoivent donc les mêmes questions.
-- Chaque jeu tourne dans un `iframe` et envoie son score au salon à la fin de la partie.
-- La connexion passe par [PeerJS](https://peerjs.com) (WebRTC) et son serveur public gratuit. Certains réseaux (écoles, entreprises) peuvent bloquer la connexion entre joueurs, et si l'hôte quitte, le salon se ferme.
+Un salon réunit **deux joueurs** (PeerJS, WebRTC) :
+
+1. L'hôte crée un salon et partage le code à 5 caractères ; l'autre joueur le saisit pour rejoindre.
+2. Une fois connectés, l'hôte clique sur **Jouer** : les deux joueurs voient la liste de tous les jeux.
+3. Le joueur non hôte **suggère** un jeu en cliquant dessus (l'hôte voit la suggestion en jaune). L'hôte peut lancer n'importe quel jeu.
+4. La partie est un **duel** : une seule question, chacun propose une réponse à son tour, sans limite d'essais, et le premier qui trouve gagne la manche. Les victoires sont comptées dans le salon, et le joueur qui commence alterne à chaque manche.
+   - Jeux « Deviner » et Pokédle : les propositions des deux joueurs s'affichent des deux côtés.
+   - Jeux à choix (plus ou moins, types, intrus, shiny) : un mauvais choix est éliminé, puis c'est à l'autre joueur.
+   - Memory : 12 paires (24 cartes), chacun son tour. Réussir une paire fait rejouer, se tromper passe la main, et celui qui trouve le plus de paires gagne (égalité possible). Le nombre de paires se règle avec `PAIRES_DUEL` dans `Ressource/memory.js`.
+
+Fonctionnement : les deux pages génèrent la même question avec la même graine (`?seed=`), donc seuls les coups circulent. Chaque jeu tourne dans un `iframe` avec `?duel=1` et envoie ses coups au salon, qui les relaie à l'adversaire.
+
+La connexion passe par le serveur public gratuit de [PeerJS](https://peerjs.com). Certains réseaux (écoles, entreprises) peuvent bloquer la connexion entre joueurs, et si l'hôte quitte, le salon se ferme.
 
 ## Ajouter un jeu
 
 1. **Jeu « Deviner »** : ajoute un mode dans `Ressource/guess.js` (affichage de la question dans `question()`, révélation dans `reveal()`), puis crée `main/deviner-<mode>.html` en copiant une page existante et en changeant `data-mode`.
 2. **Jeu à choix multiples** : ajoute une fonction dans l'objet `JEUX` de `Ressource/qcm.js` (elle renvoie `q`, `choix`, `bonne` et `expl`), puis crée la page avec `data-jeu`.
 3. **Autre type de jeu** : utilise `Core.seed()` pour l'aléatoire et appelle `Core.fin(mode, score, max)` à la fin de la partie. Cela sauvegarde le meilleur score et prévient le salon multijoueur.
-4. Ajoute la page au menu correspondant et, si elle doit être jouable à plusieurs, à la liste `JEUX` de `Ressource/multi.js`.
+4. Ajoute la page au menu correspondant et, si elle doit être jouable à plusieurs, à la liste `CATS` de `Ressource/multi.js`. Pour qu'elle fonctionne en duel, appuie-toi sur `Core.Duel` (voir `guess.js` ou `qcm.js`).
 
 ## Sauvegardes
 

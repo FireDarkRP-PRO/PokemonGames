@@ -1,8 +1,9 @@
 // Moteur commun des jeux « Deviner » : le mode vient de <body data-mode>.
-// ?seed=123 dans l'URL donne les mêmes questions à tous (utile pour le multi).
+// ?seed=123 dans l'URL donne les mêmes questions à tous.
+// En duel (?duel=1, dans le salon) : une seule question, essais illimités, chacun son tour.
 (async () => {
-  const mode = document.body.dataset.mode, $ = id => document.getElementById(id);
-  const N = 10, ESSAIS = 3, NIV = [8, 16, 32, 64];
+  const mode = document.body.dataset.mode, $ = id => document.getElementById(id), D = Core.Duel;
+  const N = D.actif ? 1 : 10, ESSAIS = D.actif ? Infinity : 3, NIV = [8, 16, 32, 64];
   let seed = Core.seed(), dejaJoue = false;
   let data;
   try { data = await Core.load(); }
@@ -11,10 +12,12 @@
   const gens = [...new Set(data.map(p => p.gen))].sort((a, b) => a - b);
   $('gen').innerHTML = '<option value="0">Toutes</option>' + gens.map(g => `<option value="${g}">Génération ${g}</option>`).join('');
   $('noms').innerHTML = data.map(p => `<option value="${p.nom}">`).join('');
+  if (D.actif) { $('gen').parentElement.hidden = true; $('info').insertAdjacentHTML('afterend', '<ul id="hist"></ul>'); }
   const img = new Image();
   let qs, i, score, essais, fini, termine, audio;
 
-  const maj = () => $('score').textContent = `Question ${Math.min(i + 1, qs.length)}/${qs.length} : ${score} pts`;
+  const maj = () => $('score').textContent = D.actif ? D.statut() : `Question ${Math.min(i + 1, qs.length)}/${qs.length} : ${score} pts`;
+  const niv = () => NIV[Math.min(essais, NIV.length - 1)];
   const paint = n => {
     const c = $('cv'), t = document.createElement('canvas'), x = c.getContext('2d');
     t.width = t.height = n; t.getContext('2d').drawImage(img, 0, 0, n, n);
@@ -32,9 +35,9 @@
     const p = qs[i], m = $('media');
     essais = 0; fini = termine = false;
     $('rep').value = ''; $('rep').disabled = false; $('info').textContent = '';
-    $('ok').textContent = 'Valider'; $('passe').hidden = false; maj();
+    $('ok').textContent = 'Valider'; $('passe').hidden = D.actif; maj();
     if (mode === 'silhouette') { m.innerHTML = '<img id="im" class="sil" alt="Silhouette d\'un Pokémon">'; $('im').src = p.image; }
-    if (mode === 'pixel') { m.innerHTML = '<canvas id="cv" width="288" height="288" aria-label="Image pixelisée"></canvas>'; img.onload = () => paint(NIV[essais]); img.src = p.image; }
+    if (mode === 'pixel') { m.innerHTML = '<canvas id="cv" width="288" height="288" aria-label="Image pixelisée"></canvas>'; img.onload = () => paint(niv()); img.src = p.image; }
     if (mode === 'cri') {
       m.innerHTML = '<button id="ecoute" type="button">Écouter le cri</button>';
       audio = new Audio(p.cri); $('ecoute').onclick = () => { audio.currentTime = 0; audio.play(); }; audio.play().catch(() => {});
@@ -59,6 +62,7 @@
     maj();
   }
   function valider() {
+    if (D.actif) { const v = $('rep').value.trim(); if (v && D.monTour()) { $('rep').value = ''; D.coup(v, appliquer, apres); } return; }
     if (termine) return start();
     if (fini) { i++; return i < qs.length ? question() : fin(); }
     const p = qs[i], v = $('rep').value;
@@ -66,7 +70,7 @@
     if (Core.norm(v) === Core.norm(p.nom)) { const pts = ESSAIS - essais; score += pts; return reveal(p, pts); }
     if (++essais >= ESSAIS) return reveal(p, 0);
     $('info').textContent = `Raté, encore ${ESSAIS - essais} essai(s).`;
-    if (mode === 'pixel') paint(NIV[essais]);
+    if (mode === 'pixel') paint(niv());
     if (mode === 'caracteristiques') hint(p, essais);
     $('rep').select();
   }
@@ -75,9 +79,30 @@
     $('media').innerHTML = `<p class="final">${score} / ${qs.length * ESSAIS} points<br>Meilleur score : ${b}</p>`;
     $('info').textContent = ''; $('ok').textContent = 'Rejouer'; $('passe').hidden = true; $('rep').disabled = true;
   }
+
+  // Duel : « par » est le joueur (0 hôte, 1 invité) qui a proposé v.
+  function appliquer(v, par) {
+    const p = qs[0], bon = Core.norm(String(v)) === Core.norm(p.nom), li = document.createElement('li');
+    li.textContent = `${D.noms[par]} : ${v} ${bon ? '✓' : '✗'}`;
+    $('hist').prepend(li);
+    if (bon) { reveal(p, 0); return true; }
+    essais++;
+    if (mode === 'pixel') paint(niv());
+    if (mode === 'caracteristiques') hint(p, essais);
+    return false;
+  }
+  function apres() {
+    maj();
+    $('rep').disabled = $('ok').disabled = !D.monTour();
+    $('ok').hidden = D.fini;
+    if (D.fini) $('info').textContent = `C'était ${qs[0].nom}.`;
+    else if (D.monTour()) $('rep').focus();
+  }
+
   $('ok').onclick = valider;
   $('passe').onclick = () => { if (!fini && !termine) reveal(qs[i], 0); };
   $('rep').addEventListener('keydown', e => { if (e.key === 'Enter') valider(); });
   $('gen').onchange = start;
   start();
+  if (D.actif) { D.ecouter(appliquer, apres); apres(); }
 })();

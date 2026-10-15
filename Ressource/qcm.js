@@ -1,6 +1,6 @@
 // Jeux à choix multiples (<body data-jeu>) : plus ou moins, efficacité des types, intrus, shiny.
 (async () => {
-  const $ = id => document.getElementById(id), jeu = document.body.dataset.jeu, N = 10;
+  const $ = id => document.getElementById(id), jeu = document.body.dataset.jeu, D = Core.Duel, N = D.actif ? 1 : 10;
   let data;
   try { data = await Core.load(); }
   catch { $('media').textContent = 'pokemon.json introuvable : lance outils/generer_pokemon.py, puis commit Ressource/pokemon.json.'; return; }
@@ -62,7 +62,7 @@
   };
 
   let i = 0, score = 0, cur, fini = false;
-  const maj = () => $('score').textContent = `Question ${Math.min(i + 1, N)}/${N} : ${score} pts`;
+  const maj = () => $('score').textContent = D.actif ? D.statut() : `Question ${Math.min(i + 1, N)}/${N} : ${score} pts`;
   function question() {
     cur = JEUX[jeu](); fini = false;
     $('media').innerHTML = cur.q; $('info').textContent = ''; $('suite').hidden = true; maj();
@@ -73,9 +73,21 @@
     $('media').innerHTML = `<p class="final">${score} / ${N} points<br>Meilleur score : ${b}</p>`;
     $('choix').innerHTML = ''; $('info').textContent = ''; $('suite').textContent = 'Rejouer';
   }
+  // Duel : un choix raté est éliminé, puis c'est à l'autre joueur ; le premier qui trouve gagne.
+  const appliquer = (k, par) => {
+    const b = Number.isInteger(k) && $('choix').children[k];
+    if (!b) return false;
+    if (k === cur.bonne) { b.classList.add('bon'); $('info').textContent = `${D.noms[par]} a trouvé ! ${cur.expl}`; return true; }
+    b.classList.add('mauvais'); $('info').textContent = `${D.noms[par]} s'est trompé(e).`; return false;
+  };
+  const apres = () => {
+    maj();
+    [...$('choix').children].forEach(b => { b.disabled = D.fini || !D.monTour() || b.classList.contains('mauvais') || b.classList.contains('bon'); });
+  };
   $('choix').onclick = e => {
     const b = e.target.closest('button');
     if (!b || fini || !cur) return;
+    if (D.actif) return D.coup(Number(b.dataset.k), appliquer, apres);
     fini = true;
     const bon = Number(b.dataset.k) === cur.bonne;
     if (bon) score++;
@@ -90,4 +102,5 @@
     else bilan();
   };
   question();
+  if (D.actif) { D.ecouter(appliquer, apres); apres(); }
 })();

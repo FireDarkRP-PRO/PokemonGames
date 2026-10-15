@@ -5,7 +5,7 @@
 <a class="retour" href="../index.html">Retour au menu</a>
 <h1>Multijoueur</h1>
 <section id="accueil" class="lobby">
-<p class="intro">Crée un salon et partage le code, ou rejoins celui d'un ami. Tout le monde joue aux mêmes questions et les scores s'affichent en direct.</p>
+<p class="intro">Crée un salon et partage le code, ou rejoins celui d'un ami. À deux, vous jouez en duel : chacun son tour, le premier qui trouve la bonne réponse gagne la manche.</p>
 <div class="saisie"><label>Ton pseudo <input id="nom" maxlength="16" value="Joueur"></label></div>
 <div class="saisie"><button id="creer" type="button">Créer un salon</button></div>
 <div class="saisie"><input id="code" maxlength="5" placeholder="Code du salon" autocomplete="off"><button id="rejoindre" type="button" class="sec">Rejoindre</button></div>
@@ -13,9 +13,19 @@
 </section>
 <section id="salon" class="lobby" hidden>
 <p>Code du salon : <strong id="codeaff"></strong></p>
-<div id="hote" class="saisie" hidden><select id="jeu"></select><button id="lancer" type="button">Lancer la partie</button></div>
-<table class="tab"><thead><tr><th>Joueur</th><th>Score</th></tr></thead><tbody id="scores"></tbody></table>
-<iframe id="cadre" title="Jeu en cours" hidden></iframe>
+<ul id="joueurs"></ul>
+<p id="attente" aria-live="polite"></p>
+<div class="saisie"><button id="jouer" type="button" hidden>Jouer</button></div>
+</section>
+<section id="menu" class="lobby" hidden>
+<p class="vic"></p>
+<p id="aide" aria-live="polite"></p>
+<div id="jeux"></div>
+</section>
+<section id="duel" class="lobby" hidden>
+<p class="vic"></p>
+<div id="hote" class="saisie" hidden><button id="rejouer" type="button">Nouvelle manche</button><button id="changer" type="button" class="sec">Changer de jeu</button></div>
+<iframe id="cadre" title="Duel en cours"></iframe>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>

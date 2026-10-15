@@ -18,6 +18,34 @@ const Core = (() => {
     if (parent !== window) parent.postMessage({ pq: 'score', mode, score, max }, '*');
     return b;
   };
-  return { rng, norm, pick, load, Store, seed, fin };
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // Mode duel (iframe du salon, ?duel=1) : deux joueurs jouent à tour de rôle, le premier qui trouve gagne.
+  // Chaque page rejoue les mêmes coups (même graine) : seuls les coups circulent, relayés par le salon.
+  const Duel = (() => {
+    const q = new URLSearchParams(location.search);
+    const d = { actif: q.get('duel') === '1', moi: q.get('moi') === '1' ? 1 : 0, tour: q.get('debut') === '1' ? 1 : 0, fini: false, gagnant: null, noms: [q.get('n0') || 'Joueur 1', q.get('n1') || 'Joueur 2'] };
+    d.monTour = () => d.actif && !d.fini && d.tour === d.moi;
+    d.statut = () => d.fini ? (d.gagnant === null ? 'Égalité parfaite !' : d.gagnant === d.moi ? 'Bravo, tu gagnes la manche !' : `${d.noms[d.gagnant]} gagne la manche.`) : d.monTour() ? 'À toi de jouer !' : `Tour de ${d.noms[d.tour]}…`;
+    // appliquer(val, par) affiche le coup du joueur « par » et renvoie :
+    //   true : bonne réponse, « par » gagne ;  false : coup raté, c'est à l'autre joueur ;
+    //   'rejoue' : coup valide, « par » continue ;  { gagnant } : fin de partie (0, 1, ou null pour une égalité).
+    const jouer = (val, par, appliquer, apres) => {
+      const r = appliquer(val, par);
+      if (r === true || (r && typeof r === 'object')) {
+        const g = r === true ? par : r.gagnant;
+        d.fini = true; d.gagnant = g;
+        if (g === d.moi) parent.postMessage({ pq: 'gagne' }, '*');
+        else if (g === null && d.moi === 0) parent.postMessage({ pq: 'nul' }, '*');
+      } else if (r !== 'rejoue') d.tour = 1 - par;
+      apres();
+    };
+    d.coup = (val, appliquer, apres) => { if (!d.monTour()) return; parent.postMessage({ pq: 'coup', val }, '*'); jouer(val, d.moi, appliquer, apres); };
+    d.ecouter = (appliquer, apres) => {
+      addEventListener('message', e => { const m = e.data; if (e.source === parent && m && m.pq === 'coup' && !d.fini) jouer(m.val, 1 - d.moi, appliquer, apres); });
+      parent.postMessage({ pq: 'pret' }, '*');
+    };
+    return d;
+  })();
+  return { rng, norm, pick, load, Store, seed, fin, esc, Duel };
 })();
 if (parent !== window) document.documentElement.classList.add('embed');

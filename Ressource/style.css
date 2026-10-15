@@ -47,3 +47,12 @@ blockquote{margin:0;font-size:1.15rem;max-width:46ch}
 .carte.trouvee{opacity:.6}
 .lobby{display:grid;gap:1rem}
 iframe{width:100%;height:760px;border:3px solid var(--texte);border-radius:1rem;background:var(--fond)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.choix button.bon:disabled{opacity:1}
+button.tuile{padding:0;font-weight:400;text-align:left;cursor:pointer}
+.tuile.sugg{outline:4px solid var(--jaune);outline-offset:2px}
+.badge{padding:0 1rem .8rem;font-style:normal;font-weight:700;color:var(--bleu)}
+.badge:empty{display:none}
+.vic{font-weight:700;font-size:1.2rem;margin:0}
+#hist{margin:.5rem 0;padding-left:1.2rem}
+.plateau.large{grid-template-columns:repeat(6,1fr);max-width:760px}
