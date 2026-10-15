@@ -1,0 +1,49 @@
+:root{--rouge:#e0392b;--bleu:#243b6b;--jaune:#ffcb05;--fond:#eef2f7;--texte:#1a2744;--gris:#5b6785}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fond);color:var(--texte);font:17px/1.5 "Trebuchet MS","Segoe UI",sans-serif}
+main{max-width:920px;margin:0 auto;padding:2rem 1.25rem 4rem}
+h1{font:900 clamp(2rem,6vw,3.4rem)/1.05 "Arial Rounded MT Bold","Trebuchet MS",sans-serif;margin:.4em 0 .3em;letter-spacing:-.02em}
+h1::after{content:"";display:block;width:4.5rem;height:.5rem;margin-top:.7rem;background:var(--jaune);border:2px solid var(--texte);border-radius:.3rem}
+h2{font-size:1.3rem;margin:2.2rem 0 0}
+.intro{max-width:52ch;color:#44516f}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;margin:1.2rem 0}
+.tuile{display:flex;flex-direction:column;background:#fff;border:3px solid var(--texte);border-radius:1rem;overflow:hidden;color:inherit;text-decoration:none;box-shadow:0 4px 0 var(--texte)}
+.tuile strong{background:var(--rouge);color:#fff;padding:.7rem 1rem;font-size:1.2rem;border-bottom:3px solid var(--texte)}
+.tuile span{padding:.8rem 1rem 1rem;flex:1}
+a.tuile:hover strong{background:var(--bleu)}
+.tuile.off{box-shadow:none}.tuile.off strong{background:var(--gris)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--jaune);outline-offset:2px}
+.retour{color:var(--texte);font-weight:700}
+.barre{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin:1rem 0}
+.media{min-height:110px;display:grid;place-items:center;background:#fff;border:3px solid var(--texte);border-radius:1rem;padding:1rem}
+.media img,.media canvas{width:288px;max-width:100%;height:auto;aspect-ratio:1}
+.sil{filter:brightness(0)}
+.saisie{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0}
+input,select,button{font:inherit;padding:.6rem .9rem;border:3px solid var(--texte);border-radius:.7rem;background:#fff;color:var(--texte)}
+input{flex:1 1 14rem}
+button{background:var(--rouge);color:#fff;font-weight:700;cursor:pointer}
+button.sec{background:#fff;color:var(--texte)}
+button[hidden]{display:none}
+.final{font-size:1.6rem;font-weight:800;text-align:center}
+#info{min-height:1.6em;font-weight:700}
+[hidden]{display:none!important}
+.embed .retour{display:none}
+.choix{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0}
+.choix button{background:#fff;color:var(--texte);display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.choix img{width:140px;max-width:100%;height:auto}
+.choix .bon{background:#c9f0d2}.choix .mauvais{background:#f7c9c4}
+.q{font-weight:700;font-size:1.15rem;text-align:center;max-width:44ch}
+blockquote{margin:0;font-size:1.15rem;max-width:46ch}
+.indices{list-style:none;margin:0;padding:0;font-size:1.15rem}
+.tab{border-collapse:collapse;width:100%;font-size:.95rem;background:#fff}
+.tab th,.tab td{border:2px solid var(--texte);padding:.35rem .5rem;text-align:center}
+.tab td.ok{background:#bfe8c6}.tab td.part{background:#ffe08a}.tab td.ko{background:#f7c9c4}
+.tab img{width:40px;height:40px;vertical-align:middle}
+.plateau{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:520px}
+.carte{aspect-ratio:1;padding:.3rem;background:#fff}
+.carte img{display:none;width:100%}
+.carte .dos{display:block;width:100%;height:100%;border-radius:50%;background:linear-gradient(var(--rouge) 46%,var(--texte) 46% 54%,#fff 54%)}
+.carte.ouverte img,.carte.trouvee img{display:block}.carte.ouverte .dos,.carte.trouvee .dos{display:none}
+.carte.trouvee{opacity:.6}
+.lobby{display:grid;gap:1rem}
+iframe{width:100%;height:760px;border:3px solid var(--texte);border-radius:1rem;background:var(--fond)}

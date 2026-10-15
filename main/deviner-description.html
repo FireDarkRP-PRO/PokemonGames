@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quel est ce Pokémon d'après le Pokédex ? – Jeux Pokémon</title><link rel="stylesheet" href="../Ressource/style.css"></head>
+<body data-mode="description"><main>
+<a class="retour" href="deviner.html">Retour à Deviner</a>
+<h1>Quel est ce Pokémon d'après le Pokédex ?</h1>
+<div class="barre"><label>Génération <select id="gen"></select></label><span id="score"></span></div>
+<div id="media" class="media">Chargement…</div>
+<div class="saisie">
+<input id="rep" list="noms" autocomplete="off" placeholder="Nom du Pokémon">
+<button id="ok" type="button">Valider</button>
+<button id="passe" type="button" class="sec">Passer</button>
+</div>
+<p id="info" aria-live="polite"></p>
+<datalist id="noms"></datalist>
+</main>
+<script src="../Ressource/core.js"></script><script src="../Ressource/guess.js"></script>
+</body></html>
