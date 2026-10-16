@@ -62,15 +62,15 @@
   };
 
   let i = 0, score = 0, cur, fini = false;
-  const maj = () => $('score').textContent = D.actif ? D.statut() : `Question ${Math.min(i + 1, N)}/${N} : ${score} pts`;
+  const maj = () => $('score').textContent = D.actif ? D.statut() : `Question ${Math.min(i + 1, N)}/${N} : ${score} essai(s)`;
   function question() {
     cur = JEUX[jeu](); fini = false;
     $('media').innerHTML = cur.q; $('info').textContent = ''; $('suite').hidden = true; maj();
     $('choix').innerHTML = cur.choix.map((c, k) => `<button type="button" data-k="${k}">${c}</button>`).join('');
   }
   function bilan() {
-    const b = Core.fin(jeu, score, N); cur = null;
-    $('media').innerHTML = `<p class="final">${score} / ${N} points<br>Meilleur score : ${b}</p>`;
+    const b = Core.fin(jeu, score); cur = null;
+    $('media').innerHTML = `<p class="final">${score} essais (${N} = parfait)<br>Record : ${b}</p>`;
     $('choix').innerHTML = ''; $('info').textContent = ''; $('suite').textContent = 'Rejouer';
   }
   // Duel : un choix raté est éliminé, puis c'est à l'autre joueur ; le premier qui trouve gagne.
@@ -88,12 +88,13 @@
     const b = e.target.closest('button');
     if (!b || fini || !cur) return;
     if (D.actif) return D.coup(Number(b.dataset.k), appliquer, apres);
+    if (b.disabled) return;
+    score++; // un essai de plus
+    if (Number(b.dataset.k) !== cur.bonne) { b.classList.add('mauvais'); b.disabled = true; $('info').textContent = 'Raté, essaie encore.'; maj(); return; }
     fini = true;
-    const bon = Number(b.dataset.k) === cur.bonne;
-    if (bon) score++;
     $('choix').children[cur.bonne].classList.add('bon');
-    if (!bon) b.classList.add('mauvais');
-    $('info').textContent = (bon ? 'Bravo ! ' : 'Raté. ') + cur.expl;
+    [...$('choix').children].forEach(x => { x.disabled = true; });
+    $('info').textContent = 'Bravo ! ' + cur.expl;
     $('suite').textContent = i + 1 < N ? 'Suivant' : 'Voir le score'; $('suite').hidden = false; maj();
   };
   $('suite').onclick = () => {

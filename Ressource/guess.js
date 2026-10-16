@@ -16,7 +16,7 @@
   const img = new Image();
   let qs, i, score, essais, fini, termine, audio;
 
-  const maj = () => $('score').textContent = D.actif ? D.statut() : `Question ${Math.min(i + 1, qs.length)}/${qs.length} : ${score} pts`;
+  const maj = () => $('score').textContent = D.actif ? D.statut() : `Question ${Math.min(i + 1, qs.length)}/${qs.length} : ${score} essai(s)`;
   const niv = () => NIV[Math.min(essais, NIV.length - 1)];
   const paint = n => {
     const c = $('cv'), t = document.createElement('canvas'), x = c.getContext('2d');
@@ -52,13 +52,13 @@
     if (n >= 2) l.push(`Taille : ${p.taille} m`, `Poids : ${p.poids} kg`);
     $('ind').innerHTML = l.map(x => `<li>${x}</li>`).join('');
   }
-  function reveal(p, pts) {
+  function reveal(p, n) {
     fini = true; $('rep').disabled = true; $('passe').hidden = true;
     $('ok').textContent = i + 1 < qs.length ? 'Suivant' : 'Voir le score';
     if (mode === 'silhouette') $('im').classList.remove('sil');
     if (mode === 'pixel') paint(288);
     if (['cri', 'description', 'caracteristiques'].includes(mode)) $('media').innerHTML = `<img src="${p.image}" alt="${p.nom}">`;
-    $('info').textContent = pts ? `Bravo, c'est ${p.nom} ! +${pts} pts` : `C'était ${p.nom}.`;
+    $('info').textContent = n ? `Bravo, c'est ${p.nom} ! Trouvé en ${n} essai(s).` : `C'était ${p.nom}.` + (D.actif ? '' : ` Compte pour ${ESSAIS + 1} essais.`);
     maj();
   }
   function valider() {
@@ -67,16 +67,16 @@
     if (fini) { i++; return i < qs.length ? question() : fin(); }
     const p = qs[i], v = $('rep').value;
     if (!v.trim()) return;
-    if (Core.norm(v) === Core.norm(p.nom)) { const pts = ESSAIS - essais; score += pts; return reveal(p, pts); }
-    if (++essais >= ESSAIS) return reveal(p, 0);
+    if (Core.norm(v) === Core.norm(p.nom)) { score += essais + 1; return reveal(p, essais + 1); }
+    if (++essais >= ESSAIS) { score += ESSAIS + 1; return reveal(p, 0); }
     $('info').textContent = `Raté, encore ${ESSAIS - essais} essai(s).`;
     if (mode === 'pixel') paint(niv());
     if (mode === 'caracteristiques') hint(p, essais);
     $('rep').select();
   }
   function fin() {
-    const b = Core.fin(mode, score, qs.length * ESSAIS); termine = true;
-    $('media').innerHTML = `<p class="final">${score} / ${qs.length * ESSAIS} points<br>Meilleur score : ${b}</p>`;
+    const b = Core.fin(mode, score); termine = true;
+    $('media').innerHTML = `<p class="final">${score} essais (${qs.length} = parfait)<br>Record : ${b}</p>`;
     $('info').textContent = ''; $('ok').textContent = 'Rejouer'; $('passe').hidden = true; $('rep').disabled = true;
   }
 
@@ -100,7 +100,7 @@
   }
 
   $('ok').onclick = valider;
-  $('passe').onclick = () => { if (!fini && !termine) reveal(qs[i], 0); };
+  $('passe').onclick = () => { if (!fini && !termine) { score += ESSAIS + 1; reveal(qs[i], 0); } };
   $('rep').addEventListener('keydown', e => { if (e.key === 'Enter') valider(); });
   $('gen').onchange = start;
   start();

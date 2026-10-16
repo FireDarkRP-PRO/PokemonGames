@@ -89,12 +89,12 @@ La connexion passe par le serveur public gratuit de [PeerJS](https://peerjs.com)
 
 1. **Jeu « Deviner »** : ajoute un mode dans `Ressource/guess.js` (affichage de la question dans `question()`, révélation dans `reveal()`), puis crée `main/deviner-<mode>.html` en copiant une page existante et en changeant `data-mode`.
 2. **Jeu à choix multiples** : ajoute une fonction dans l'objet `JEUX` de `Ressource/qcm.js` (elle renvoie `q`, `choix`, `bonne` et `expl`), puis crée la page avec `data-jeu`.
-3. **Autre type de jeu** : utilise `Core.seed()` pour l'aléatoire et appelle `Core.fin(mode, score, max)` à la fin de la partie. Cela sauvegarde le meilleur score et prévient le salon multijoueur.
+3. **Autre type de jeu** : utilise `Core.seed()` pour l'aléatoire et appelle `Core.fin(mode, score)` à la fin d'une partie solo : le score est le nombre d'essais et cela sauvegarde le record (le plus bas).
 4. Ajoute la page au menu correspondant et, si elle doit être jouable à plusieurs, à la liste `CATS` de `Ressource/multi.js`. Pour qu'elle fonctionne en duel, appuie-toi sur `Core.Duel` (voir `guess.js` ou `qcm.js`).
 
 ## Sauvegardes
 
-Les meilleurs scores sont stockés dans le `localStorage` du navigateur, via `Core.Store` dans `core.js`. Quand une base de données arrivera (comptes utilisateurs), c'est le seul endroit à modifier.
+Dans tous les jeux solo, le score est le nombre d'essais : plus il est bas, mieux c'est, et le record est le plus bas obtenu (Deviner : 10 au mieux, une question ratée compte 4 ; jeux à choix : un mauvais choix est éliminé et compte comme un essai ; Pokédle : nombre de propositions, un abandon n'enregistre rien ; Memory : nombre de coups, 6 au mieux). Les records sont stockés dans le `localStorage` du navigateur, via `Core.Store` dans `core.js`. Quand une base de données arrivera (comptes utilisateurs), c'est le seul endroit à modifier.
 
 ## À faire
 

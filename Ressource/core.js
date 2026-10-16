@@ -11,11 +11,10 @@ const Core = (() => {
     set(k, v) { try { localStorage.setItem('pq:' + k, JSON.stringify(v)); } catch {} }
   };
   const seed = () => Number(new URLSearchParams(location.search).get('seed')) || Date.now() % 1e9;
-  // Fin de partie : garde le meilleur score et prévient le salon multijoueur si la page est dans un iframe.
-  const fin = (mode, score, max) => {
-    const k = 'meilleur:' + mode, b = Math.max(Store.get(k, 0), score);
+  // Fin de partie solo : le score est le nombre d'essais, le plus bas est le meilleur. Renvoie le record.
+  const fin = (mode, score) => {
+    const k = 'record:' + mode, r = Store.get(k, null), b = r === null ? score : Math.min(r, score);
     Store.set(k, b);
-    if (parent !== window) parent.postMessage({ pq: 'score', mode, score, max }, '*');
     return b;
   };
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

@@ -1,7 +1,7 @@
 // Pokédle : trouve le Pokémon mystère, sans limite d'essais.
 // En duel (?duel=1, dans le salon) : tableau partagé, chacun son tour, le premier qui trouve gagne.
 (async () => {
-  const $ = id => document.getElementById(id), REF = 8, D = Core.Duel;
+  const $ = id => document.getElementById(id), D = Core.Duel;
   let data;
   try { data = await Core.load(); }
   catch { $('info').textContent = 'pokemon.json introuvable : lance outils/generer_pokemon.py, puis commit Ressource/pokemon.json.'; return; }
@@ -15,11 +15,11 @@
   const fe = v => v === undefined ? '<td>?</td>' : `<td class="${v === cible.final ? 'ok' : 'ko'}">${v ? 'Oui' : 'Non'}</td>`;
   const ajouter = (p, par) => $('lignes').insertAdjacentHTML('afterbegin', `<tr><td><img src="${p.image}" alt=""> ${p.nom}${D.actif ? `<br><small>${Core.esc(D.noms[par])}</small>` : ''}</td>${typ(p.types[0], 0)}${typ(p.types[1], 1)}${num(p.gen, cible.gen, '')}${num(p.stade, cible.stade, '')}${fe(p.final)}${num(p.taille, cible.taille, ' m')}${num(p.poids, cible.poids, ' kg')}</tr>`);
 
-  // Score : 8 si trouvé du premier coup, jusqu'à 1 au-delà de 8 essais ; 0 si abandon.
+  // Score = nombre d'essais (le plus bas est le meilleur) ; un abandon n'enregistre rien.
   function terminer(gagne) {
     fini = true; $('rep').disabled = true; $('abandon').hidden = true; $('ok').textContent = 'Rejouer';
-    const score = gagne ? Math.max(1, REF + 1 - essais) : 0, b = Core.fin('pokedle', score, REF);
-    $('info').textContent = (gagne ? `Trouvé en ${essais} essai(s) !` : `Abandon : c'était ${cible.nom}.`) + ` Score ${score}/${REF}, meilleur : ${b}.`;
+    if (!gagne) { $('info').textContent = `Abandon : c'était ${cible.nom}. Pas de score.`; return; }
+    $('info').textContent = `Trouvé en ${essais} essai(s) ! Record : ${Core.fin('pokedle', essais)}.`;
   }
   function proposer() {
     if (fini) return location.reload();

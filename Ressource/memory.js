@@ -1,4 +1,4 @@
-// Memory. Solo : 6 paires, score = 24 - coups (18 au mieux).
+// Memory. Solo : 6 paires, score = nombre de coups (6 au mieux, le plus bas est le meilleur).
 // Duel (?duel=1) : 12 paires, chacun son tour (une paire trouvée fait rejouer, une erreur passe la main),
 // le gagnant est celui qui a trouvé le plus de paires.
 (async () => {
@@ -49,8 +49,7 @@
     if (cartes[a.dataset.k].id === cartes[b.dataset.k].id) {
       for (const x of [a, b]) x.classList.replace('ouverte', 'trouvee');
       if (++trouvees === NB) {
-        const score = Math.max(0, 24 - coups), best = Core.fin('memory', score, 18);
-        $('info').textContent = `Bravo ! ${coups} coups, score ${score}/18, meilleur : ${best}.`; $('rejouer').hidden = false;
+        $('info').textContent = `Bravo ! Terminé en ${coups} coups (6 = parfait). Record : ${Core.fin('memory', coups)}.`; $('rejouer').hidden = false;
       }
     } else { bloque = true; setTimeout(() => { a.classList.remove('ouverte'); b.classList.remove('ouverte'); bloque = false; }, 800); }
   };
