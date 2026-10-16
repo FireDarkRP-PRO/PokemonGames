@@ -18,6 +18,8 @@
       ['reflexion-intrus.html', "Quel est l'intrus ?", 'Trois Pokémon partagent un type, pas le quatrième.']]],
     ['Autre', [
       ['autre-shiny.html', 'Lequel est le shiny ?', 'Deux images, une seule est chromatique.'],
+      ['autre-quiestce.html', 'Qui est-ce ? Groupe aléatoire', '30 Pokémon tirés au hasard : devine le Pokémon secret de ton adversaire.'],
+      ['autre-quiestce-perso.html', 'Qui est-ce ? Groupe personnalisé', 'Chacun ajoute 15 Pokémon pour former le groupe de 30.'],
       ['autre-memory.html', 'Memory', 'Chacun son tour : celui qui trouve le plus de paires gagne.']]]
   ];
   const PAGES = new Set(CATS.flatMap(c => c[1].filter(j => !j[3]).map(j => j[0])));

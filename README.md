@@ -24,6 +24,7 @@ Site de mini-jeux Pokémon, 100 % statique, hébergé sur GitHub Pages. Chaque j
 │   ├── qcm.js                  Plus ou moins, types, intrus, shiny
 │   ├── pokedle.js              Pokédle
 │   ├── memory.js               Memory
+│   ├── quiestce.js             Qui est-ce ? (duel uniquement)
 │   ├── multi.js                Salon multijoueur
 │   └── pokemon.json            Données (à générer, voir ci-dessous)
 ├── main/
@@ -79,7 +80,17 @@ Un salon réunit **deux joueurs** (PeerJS, WebRTC) :
 4. La partie est un **duel** : une seule question, chacun propose une réponse à son tour, sans limite d'essais, et le premier qui trouve gagne la manche. Les victoires sont comptées dans le salon, et le joueur qui commence alterne à chaque manche.
    - Jeux « Deviner » et Pokédle : les propositions des deux joueurs s'affichent des deux côtés.
    - Jeux à choix (plus ou moins, types, intrus, shiny) : un mauvais choix est éliminé, puis c'est à l'autre joueur.
+   - Qui est-ce ? (deux variantes, uniquement en duel) : voir ci-dessous.
    - Memory : 12 paires (24 cartes), chacun son tour. Réussir une paire fait rejouer, se tromper passe la main, et celui qui trouve le plus de paires gagne (égalité possible). Le nombre de paires se règle avec `PAIRES_DUEL` dans `Ressource/memory.js`.
+
+### Qui est-ce ?
+
+Mode réservé au multijoueur (grisé sur l'accueil), avec deux tuiles dans le salon :
+
+- **Groupe aléatoire** : 30 Pokémon tirés au hasard.
+- **Groupe personnalisé** : chaque joueur ajoute 15 Pokémon (autocomplétion, « Un au hasard » ou « Compléter au hasard »). Les doublons entre les deux sélections sont remplacés au hasard pour garder 30 Pokémon.
+
+Chacun choisit en secret le Pokémon que l'autre doit deviner. Puis, à tour de rôle, le joueur dont c'est le tour écrit une question (réponse par Oui ou Non) ou clique sur « Deviner le Pokémon » pour proposer une tuile (re-cliquer annule). Une mauvaise proposition fait passer la main et cache la tuile. Un clic sur une tuile la cache ou la réaffiche, uniquement pour soi. Les Pokémon secrets ne circulent jamais avant la fin : c'est le joueur concerné qui répond aux propositions.
 
 Fonctionnement : les deux pages génèrent la même question avec la même graine (`?seed=`), donc seuls les coups circulent. Chaque jeu tourne dans un `iframe` avec `?duel=1` et envoie ses coups au salon, qui les relaie à l'adversaire.
 

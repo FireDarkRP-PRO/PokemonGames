@@ -46,7 +46,7 @@ blockquote{margin:0;font-size:1.15rem;max-width:46ch}
 .carte.ouverte img,.carte.trouvee img{display:block}.carte.ouverte .dos,.carte.trouvee .dos{display:none}
 .carte.trouvee{opacity:.6}
 .lobby{display:grid;gap:1rem}
-iframe{width:100%;height:760px;border:3px solid var(--texte);border-radius:1rem;background:var(--fond)}
+iframe{width:100%;height:min(90vh,900px);min-height:560px;border:3px solid var(--texte);border-radius:1rem;background:var(--fond)}
 button:disabled{opacity:.55;cursor:not-allowed}
 .choix button.bon:disabled{opacity:1}
 button.tuile{padding:0;font-weight:400;text-align:left;cursor:pointer}
@@ -56,3 +56,14 @@ button.tuile{padding:0;font-weight:400;text-align:left;cursor:pointer}
 .vic{font-weight:700;font-size:1.2rem;margin:0}
 #hist{margin:.5rem 0;padding-left:1.2rem}
 .plateau.large{grid-template-columns:repeat(6,1fr);max-width:760px}
+.qe-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:.4rem;margin:.8rem 0}
+.tq{display:flex;flex-direction:column;align-items:center;gap:.1rem;padding:.25rem;background:#fff;color:var(--texte);font-size:.72rem;font-weight:700;word-break:break-word}
+.tq img{width:100%;max-width:72px;height:auto;aspect-ratio:1}
+.tq.cache{opacity:.15}
+.tq.sel{outline:4px solid var(--rouge)}
+.tq.secret{outline:4px solid var(--jaune)}
+.puces{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:.4rem}
+.puces li{background:#fff;border:2px solid var(--texte);border-radius:2rem;padding:.1rem .3rem .1rem .8rem;display:flex;align-items:center;gap:.3rem}
+.puces button{padding:0 .5rem;border-radius:1rem;font-size:.9rem}
+textarea{font:inherit;width:100%;padding:.6rem .9rem;border:3px solid var(--texte);border-radius:.7rem;resize:vertical;background:#fff;color:var(--texte)}
+#journal{padding-left:1.2rem}
