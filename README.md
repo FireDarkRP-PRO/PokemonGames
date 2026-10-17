@@ -77,7 +77,7 @@ Un salon réunit **deux joueurs** (PeerJS, WebRTC) :
 1. L'hôte crée un salon et partage le code à 5 caractères ; l'autre joueur le saisit pour rejoindre.
 2. Une fois connectés, l'hôte clique sur **Jouer** : les deux joueurs voient la liste de tous les jeux.
 3. Le joueur non hôte **suggère** un jeu en cliquant dessus (l'hôte voit la suggestion en jaune). L'hôte peut lancer n'importe quel jeu.
-4. La partie est un **duel** : une seule question, chacun propose une réponse à son tour, sans limite d'essais, et le premier qui trouve gagne la manche. Les victoires sont comptées dans le salon, et le joueur qui commence alterne à chaque manche.
+4. La partie est un **duel** : une seule question, chacun propose une réponse à son tour, sans limite d'essais, et le premier qui trouve gagne la manche. Les victoires sont comptées dans le salon, et le joueur qui commence alterne à chaque manche. À tout moment, l'un ou l'autre peut revenir à la sélection des jeux (bouton « Retour à la sélection des jeux ») sans quitter le salon ni perdre les victoires.
    - Jeux « Deviner » et Pokédle : les propositions des deux joueurs s'affichent des deux côtés.
    - Jeux à choix (plus ou moins, types, intrus, shiny) : un mauvais choix est éliminé, puis c'est à l'autre joueur.
    - Qui est-ce ? (deux variantes, uniquement en duel) : voir ci-dessous.
@@ -90,7 +90,7 @@ Mode réservé au multijoueur (grisé sur l'accueil), avec deux tuiles dans le s
 - **Groupe aléatoire** : 30 Pokémon tirés au hasard.
 - **Groupe personnalisé** : chaque joueur ajoute 15 Pokémon (autocomplétion, « Un au hasard » ou « Compléter au hasard »). Les doublons entre les deux sélections sont remplacés au hasard pour garder 30 Pokémon.
 
-Chacun choisit en secret le Pokémon que l'autre doit deviner. Puis, à tour de rôle, le joueur dont c'est le tour écrit une question (réponse par Oui ou Non) ou clique sur « Deviner le Pokémon » pour proposer une tuile (re-cliquer annule). Une mauvaise proposition fait passer la main et cache la tuile. Un clic sur une tuile la cache ou la réaffiche, uniquement pour soi. Les Pokémon secrets ne circulent jamais avant la fin : c'est le joueur concerné qui répond aux propositions.
+Chacun choisit en secret le Pokémon que l'autre doit deviner. Puis, à tour de rôle, le joueur dont c'est le tour écrit une question (réponse par Oui ou Non) ou clique sur « Deviner le Pokémon » pour proposer une tuile, puis valide ou annule dans un popup (idem pour le choix du Pokémon secret). Une mauvaise proposition fait passer la main et cache la tuile. Un clic sur une tuile la cache ou la réaffiche, uniquement pour soi. Les Pokémon secrets ne circulent jamais avant la fin : c'est le joueur concerné qui répond aux propositions.
 
 Fonctionnement : les deux pages génèrent la même question avec la même graine (`?seed=`), donc seuls les coups circulent. Chaque jeu tourne dans un `iframe` avec `?duel=1` et envoie ses coups au salon, qui les relaie à l'adversaire.
 

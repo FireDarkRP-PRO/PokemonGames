@@ -14,7 +14,7 @@
   let groupe = [], mine = [], advListe = null, listeEnvoyee = false;
   let secret = null, advPret = false, phase = perso ? 'groupe' : 'secret';
   let tour = D.tour, sub = 'tour'; // tour : qui pose la question ; sub : tour | reponse | verdict
-  let fini = false, resultat = '', modeDeviner = false, choix = null, dernier = null;
+  let fini = false, resultat = '', modeDeviner = false, choix = null, dernier = null, modalOuvert = false;
   $('noms').innerHTML = pool.map(p => `<option value="${p.nom}">`).join('');
 
   const log = t => { const li = document.createElement('li'); li.textContent = t; $('journal').prepend(li); };
@@ -73,8 +73,15 @@
     $('zone-q').hidden = !monTour();
     $('zone-r').hidden = !(jeu && !fini && sub === 'reponse' && tour !== moi);
     $('deviner').textContent = modeDeviner ? 'Annuler la proposition' : 'Deviner le Pokémon';
-    $('zc').hidden = !(choix !== null && (choixSecret || (monTour() && modeDeviner)));
-    $('confirmer').textContent = choixSecret ? `C'est mon Pokémon : ${nomDe(choix)}` : `Confirmer : est-ce ${nomDe(choix)} ?`;
+    const ouvert = choix !== null && (choixSecret || (monTour() && modeDeviner)); // popup de validation
+    $('modal').hidden = !ouvert;
+    if (ouvert) {
+      $('modal-img').src = parId.get(choix).image;
+      $('modal-titre').textContent = choixSecret ? `${nomDe(choix)} sera ton Pokémon secret ?` : `Proposer ${nomDe(choix)} ?`;
+      $('modal-texte').textContent = choixSecret ? 'Tu ne pourras plus le changer.' : `Si ce n'est pas le bon, la main passe à ${D.noms[adv]}.`;
+      if (!modalOuvert) $('modal-ok').focus();
+    }
+    modalOuvert = ouvert;
     for (const t of $('plateau').children) { const id = Number(t.dataset.id); t.classList.toggle('sel', id === choix); t.classList.toggle('secret', id === secret); }
     $('mon-secret').textContent = secret === null ? '' : `Ton Pokémon, que ${D.noms[adv]} doit deviner : ${nomDe(secret)} (entouré en jaune).`;
     $('statut').textContent = statut();
@@ -91,15 +98,17 @@
     const t = e.target.closest('.tq');
     if (!t || fini) return;
     const id = Number(t.dataset.id);
-    if ((phase === 'secret' && secret === null) || (monTour() && modeDeviner)) { choix = choix === id ? null : id; return maj(); } // re-cliquer annule
+    if ((phase === 'secret' && secret === null) || (monTour() && modeDeviner)) { choix = id; return maj(); } // un popup demande de valider
     t.classList.toggle('cache'); // cacher / réafficher une tuile (privé)
   };
-  $('confirmer').onclick = () => {
+  $('modal-ok').onclick = () => {
     if (choix === null) return;
     if (phase === 'secret' && secret === null) { secret = choix; choix = null; send({ k: 'pret' }); essaiJeu(); }
     else if (monTour() && modeDeviner) { dernier = choix; send({ k: 'guess', id: choix }); sub = 'verdict'; modeDeviner = false; choix = null; }
     maj();
   };
+  $('modal-non').onclick = () => { choix = null; maj(); };
+  addEventListener('keydown', e => { if (e.key === 'Escape' && choix !== null) { choix = null; maj(); } });
   $('deviner').onclick = () => { if (!monTour()) return; modeDeviner = !modeDeviner; choix = null; maj(); };
   $('envoyer').onclick = () => {
     const t = $('question').value.trim();

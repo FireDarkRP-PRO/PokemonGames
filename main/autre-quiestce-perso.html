@@ -15,7 +15,10 @@
 <p id="info-groupe" aria-live="polite"></p>
 <datalist id="noms"></datalist>
 </section>
-<div id="zc" class="saisie" hidden><button id="confirmer" type="button"></button></div>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titre" hidden>
+<div class="modal-boite"><img id="modal-img" alt="" width="120" height="120"><p id="modal-titre" class="q"></p><p id="modal-texte"></p>
+<div class="saisie"><button id="modal-ok" type="button">Valider</button><button id="modal-non" type="button" class="sec">Annuler</button></div></div>
+</div>
 <section id="p-jeu" class="lobby" hidden>
 <p id="mon-secret"></p>
 <div id="zone-q" hidden>

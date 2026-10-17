@@ -48,6 +48,8 @@
   }
 
   function afficher() {
+    const src = $('cadre').getAttribute('src'); // quitter un jeu : on arrête la page qui tournait
+    if (etat.phase !== 'duel' && src && src !== 'about:blank') $('cadre').src = 'about:blank';
     const [a, b] = etat.noms;
     document.querySelectorAll('.vic').forEach(p => p.textContent = `${a} ${etat.victoires[0]} – ${etat.victoires[1]} ${b ?? '…'}`);
     if (etat.phase === 'salon') {
@@ -68,7 +70,7 @@
       }
     } else {
       montrer('duel');
-      $('hote').hidden = !estHote;
+      $('rejouer').hidden = !estHote;
       const p = etat.partie;
       if (etat.manche !== manche && p && PAGES.has(p.page)) {
         manche = etat.manche; pret = false; attente = [];
@@ -103,6 +105,7 @@
         if (d.t === 'hello') { let n = String(d.nom).slice(0, 16) || 'Joueur'; if (n === etat.noms[0]) n += ' 2'; etat.noms[1] = n; diffuser(); }
         else if (d.t === 'suggere' && etat.phase === 'menu' && PAGES.has(d.page)) { etat.suggestion = d.page; diffuser(); }
         else if (d.t === 'coup') versIframe(d.val);
+        else if (d.t === 'menu' && etat.phase === 'duel') { etat.phase = 'menu'; etat.suggestion = null; diffuser(); }
         else if (d.t === 'gagne' && etat.phase === 'duel' && !etat.fini) { etat.victoires[1]++; etat.fini = true; diffuser(); }
       });
       c.on('close', () => {
@@ -133,7 +136,10 @@
   $('rejoindre').onclick = rejoindre;
   $('jouer').onclick = () => { etat.phase = 'menu'; diffuser(); };
   $('rejouer').onclick = () => lancer(etat.partie.page);
-  $('changer').onclick = () => { etat.phase = 'menu'; etat.suggestion = null; diffuser(); };
+  $('changer').onclick = () => { // les deux joueurs peuvent revenir au choix des jeux sans quitter le salon
+    if (estHote) { etat.phase = 'menu'; etat.suggestion = null; diffuser(); }
+    else if (hote && hote.open) hote.send({ t: 'menu' });
+  };
 
   // Messages de l'iframe : prêt, coup joué (à relayer), manche gagnée.
   addEventListener('message', e => {
