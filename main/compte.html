@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mon compte – Jeux Pokémon</title><link rel="stylesheet" href="../Ressource/style.css"></head>
+<body><main>
+<a class="retour" href="../index.html">Retour au menu</a>
+<h1>Mon compte</h1>
+<p id="chargement">Chargement…</p>
+<section id="visiteur" class="lobby" hidden>
+<p class="intro">Crée un compte pour sauvegarder tes records, apparaître dans les classements et suivre tes statistiques. Tu peux aussi continuer à jouer sans compte.</p>
+<div class="saisie"><button id="onglet-co" type="button">Se connecter</button><button id="onglet-cr" type="button" class="sec">Créer un compte</button></div>
+<form id="form" class="compte-form">
+<label>Pseudo <input id="pseudo" autocomplete="username" minlength="3" maxlength="16" required></label>
+<label>Mot de passe <input id="mdp" type="password" autocomplete="current-password" minlength="8" required></label>
+<label id="l-mdp2" hidden>Confirmer le mot de passe <input id="mdp2" type="password" autocomplete="new-password"></label>
+<p id="note-mdp" class="note" hidden>Pseudo : 3 à 16 caractères (lettres, chiffres, - et _). Il n'y a pas d'e-mail : un mot de passe oublié ne peut pas être récupéré.</p>
+<button id="envoyer" type="submit">Se connecter</button>
+</form>
+<p id="msg" aria-live="polite"></p>
+</section>
+<section id="profil" class="lobby" hidden>
+<p id="entete" class="vic"></p>
+<div class="saisie"><button id="deco" type="button" class="sec">Se déconnecter</button></div>
+<h2>Statistiques</h2>
+<div class="tab-scroll"><table class="tab"><thead><tr><th>Jeu</th><th>Record</th><th>Parties</th><th>Moyenne</th><th>Duels (V / N / D)</th></tr></thead><tbody id="stats"></tbody></table></div>
+<p id="aucune" hidden>Aucune partie enregistrée pour l'instant : joue connecté pour remplir tes statistiques.</p>
+<h2>Jeux les plus joués</h2>
+<div id="camembert" class="camembert"></div>
+<details><summary>Supprimer mon compte</summary>
+<p class="note">Supprime ton profil et toutes tes statistiques, définitivement.</p>
+<div class="saisie"><input id="mdp-sup" type="password" autocomplete="current-password" placeholder="Ton mot de passe"><button id="supprimer" type="button">Supprimer</button></div>
+<p id="msg-sup" aria-live="polite"></p>
+</details>
+</section>
+</main>
+<script src="../Ressource/core.js"></script>
+<script type="module" src="../Ressource/firebase.js"></script>
+<script src="../Ressource/compte.js"></script>
+</body></html>

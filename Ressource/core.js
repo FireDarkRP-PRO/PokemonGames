@@ -11,12 +11,16 @@ const Core = (() => {
     set(k, v) { try { localStorage.setItem('pq:' + k, JSON.stringify(v)); } catch {} }
   };
   const seed = () => Number(new URLSearchParams(location.search).get('seed')) || Date.now() % 1e9;
-  // Fin de partie solo : le score est le nombre d'essais, le plus bas est le meilleur. Renvoie le record.
-  const fin = (mode, score) => {
+  // Fin de partie solo : le score est le nombre d'essais, le plus bas est le meilleur. Renvoie le record local.
+  // Si le joueur est connecté, la partie est aussi enregistrée sur son compte (classe = false : partie non classée).
+  const fin = (mode, score, classe = true) => {
     const k = 'record:' + mode, r = Store.get(k, null), b = r === null ? score : Math.min(r, score);
     Store.set(k, b);
+    if (classe && window.Compte) window.Compte.enregistrer(mode, score).catch(e => console.warn(e));
     return b;
   };
+  // Exécute f(Compte) dès que le module de comptes (firebase.js) est chargé.
+  const surCompte = f => window.Compte ? f(window.Compte) : addEventListener('compte-pret', () => f(window.Compte), { once: true });
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // Mode duel (iframe du salon, ?duel=1) : deux joueurs jouent à tour de rôle, le premier qui trouve gagne.
   // Chaque page rejoue les mêmes coups (même graine) : seuls les coups circulent, relayés par le salon.
@@ -45,6 +49,6 @@ const Core = (() => {
     };
     return d;
   })();
-  return { rng, norm, pick, load, Store, seed, fin, esc, Duel };
+  return { rng, norm, pick, load, Store, seed, fin, esc, Duel, surCompte };
 })();
 if (parent !== window) document.documentElement.classList.add('embed');

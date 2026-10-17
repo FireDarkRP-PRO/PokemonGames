@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function connecte() { return request.auth != null; }
+    // Les comptes n'ont pas d'e-mail réel : l'e-mail est dérivé du pseudo, donc on peut vérifier le pseudo.
+    function emailDe(p) { return p.lower() + '@joueurs.pokemongames.invalid'; }
+    function pseudoValide(p) { return p is string && p.matches('^[A-Za-z0-9_-]{3,16}$'); }
+
+    function jeuSolo(j) {
+      return j in ['silhouette', 'cri', 'pixel', 'description', 'caracteristiques', 'plusmoins', 'types', 'intrus', 'shiny', 'pokedle', 'memory'];
+    }
+    function jeuDuel(j) { return jeuSolo(j) || j in ['quiestce', 'quiestce-perso']; }
+    // Scores plausibles par partie (nombre d'essais).
+    function scoreMin(j) { return j == 'pokedle' ? 1 : j == 'memory' ? 6 : 10; }
+    function scoreMax(j) {
+      return j in ['silhouette', 'cri', 'pixel', 'description', 'caracteristiques'] ? 40
+           : j in ['plusmoins', 'types', 'intrus', 'shiny'] ? 60
+           : j == 'memory' ? 300 : 3000;
+    }
+
+    // Profil : lisible par tous, créé une seule fois par son propriétaire, pseudo définitif.
+    match /joueurs/{uid} {
+      allow read: if true;
+      allow create: if connecte() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['pseudo', 'creeLe'])
+        && request.resource.data.keys().hasAll(['pseudo', 'creeLe'])
+        && pseudoValide(request.resource.data.pseudo)
+        && request.auth.token.email == emailDe(request.resource.data.pseudo)
+        && request.resource.data.creeLe == request.time;
+      allow update: if false;
+      allow delete: if connecte() && request.auth.uid == uid;
+    }
+
+    // Statistiques d'un joueur pour un jeu (sert aussi au classement).
+    match /classements/{jeu}/joueurs/{uid} {
+      function ancien(c) { return resource == null ? 0 : resource.data.get(c, 0); }
+      function nouveau(c) { return request.resource.data.get(c, 0); }
+      function delta() { return nouveau('total') - ancien('total'); }
+      function ancienRecord() { return resource == null ? null : resource.data.get('record', null); }
+
+      // Une partie solo terminée : +1 partie, score plausible, record = min(ancien record, score).
+      function soloOk() {
+        return jeuSolo(jeu)
+          && nouveau('parties') == ancien('parties') + 1
+          && delta() >= scoreMin(jeu) && delta() <= scoreMax(jeu)
+          && nouveau('duels') == ancien('duels') && nouveau('victoires') == ancien('victoires') && nouveau('nuls') == ancien('nuls')
+          && request.resource.data.get('record', null) == (ancienRecord() != null && ancienRecord() < delta() ? ancienRecord() : delta());
+      }
+      // Un duel terminé : +1 duel, au plus une victoire ou un nul, le reste inchangé.
+      function duelOk() {
+        return nouveau('duels') == ancien('duels') + 1
+          && (nouveau('victoires') - ancien('victoires')) in [0, 1]
+          && (nouveau('nuls') - ancien('nuls')) in [0, 1]
+          && (nouveau('victoires') - ancien('victoires')) + (nouveau('nuls') - ancien('nuls')) <= 1
+          && nouveau('parties') == ancien('parties') && nouveau('total') == ancien('total')
+          && request.resource.data.get('record', null) == ancienRecord();
+      }
+
+      allow read: if true;
+      allow create, update: if connecte() && request.auth.uid == uid && jeuDuel(jeu)
+        && request.resource.data.keys().hasOnly(['pseudo', 'record', 'parties', 'total', 'derniere', 'duels', 'victoires', 'nuls'])
+        && request.resource.data.keys().hasAll(['pseudo', 'derniere'])
+        && request.resource.data.derniere == request.time
+        && request.resource.data.pseudo == get(/databases/$(database)/documents/joueurs/$(uid)).data.pseudo
+        && (resource == null || request.time > resource.data.derniere + duration.value(3, 's'))
+        && (soloOk() || duelOk());
+      allow delete: if connecte() && request.auth.uid == uid;
+    }
+  }
+}

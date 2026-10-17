@@ -71,3 +71,14 @@ textarea{font:inherit;width:100%;padding:.6rem .9rem;border:3px solid var(--text
 .modal-boite{background:#fff;border:3px solid var(--texte);border-radius:1rem;padding:1.2rem;text-align:center;max-width:340px;box-shadow:0 6px 0 var(--texte)}
 .modal-boite p{margin:.3rem 0}
 .modal-boite .saisie{justify-content:center}
+.compte-form{display:grid;gap:.8rem;max-width:380px}
+.compte-form label{display:grid;gap:.2rem;font-weight:700}
+.note{font-size:.9rem;color:var(--gris);margin:.2rem 0}
+.tab-scroll{overflow-x:auto}
+.tab tr.moi td{background:#ffe08a}
+.camembert{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center}
+.camembert svg{width:240px;height:240px;flex:none}
+.legende{list-style:none;padding:0;margin:0;display:grid;gap:.3rem}
+.legende li{display:flex;align-items:center;gap:.5rem}
+.pastille{width:1rem;height:1rem;border-radius:50%;border:2px solid var(--texte);flex:none}
+.barre a{color:var(--texte);font-weight:700}

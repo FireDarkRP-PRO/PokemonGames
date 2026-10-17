@@ -25,6 +25,9 @@ Site de mini-jeux Pokémon, 100 % statique, hébergé sur GitHub Pages. Chaque j
 │   ├── pokedle.js              Pokédle
 │   ├── memory.js               Memory
 │   ├── quiestce.js             Qui est-ce ? (duel uniquement)
+│   ├── firebase.js             Comptes et statistiques (Firebase)
+│   ├── compte.js               Page « Mon compte »
+│   ├── classement.js           Page « Classements »
 │   ├── multi.js                Salon multijoueur
 │   └── pokemon.json            Données (à générer, voir ci-dessous)
 ├── main/
@@ -107,9 +110,20 @@ La connexion passe par le serveur public gratuit de [PeerJS](https://peerjs.com)
 
 Dans tous les jeux solo, le score est le nombre d'essais : plus il est bas, mieux c'est, et le record est le plus bas obtenu (Deviner : 10 au mieux, une question ratée compte 4 ; jeux à choix : un mauvais choix est éliminé et compte comme un essai ; Pokédle : nombre de propositions, un abandon n'enregistre rien ; Memory : nombre de coups, 6 au mieux). Les records sont stockés dans le `localStorage` du navigateur, via `Core.Store` dans `core.js`. Quand une base de données arrivera (comptes utilisateurs), c'est le seul endroit à modifier.
 
+## Comptes et classements (Firebase)
+
+Les comptes sont **facultatifs** : sans compte, tout fonctionne avec les records locaux. Connecté, chaque partie terminée est aussi enregistrée sur le compte.
+
+- **Connexion :** pseudo + mot de passe (8 caractères minimum), sans e-mail réel. Le pseudo sert à fabriquer un e-mail factice (`pseudo@joueurs.pokemongames.invalid`) pour Firebase Authentication, qui gère le hachage : aucun mot de passe n'est stocké dans la base. Conséquence : un mot de passe oublié n'est pas récupérable.
+- **Pages :** `main/compte.html` (connexion, inscription, profil, statistiques, camembert des jeux les plus joués, suppression du compte) et `main/classement.html`.
+- **Données (Firestore, eur3) :** `joueurs/{uid}` (pseudo, date de création) et `classements/{jeu}/joueurs/{uid}` (pseudo, record, parties, total, derniere, duels, victoires, nuls). Le profil et les classements lisent les mêmes documents. Les profils sont publics (pseudo et statistiques).
+- **Ce qui est enregistré :** le record (le plus petit score), le nombre de parties terminées, la moyenne, et les duels (victoires, nuls, défaites). Les abandons ne comptent pas. En « Deviner », seules les parties avec toutes les générations sont classées.
+- **Sécurité :** Firestore n'a pas d'injection de type SQL. `firestore.rules` valide chaque écriture : propriétaire du document, champs autorisés, score plausible, record cohérent, une seule partie à la fois, 3 secondes minimum entre deux écritures, pseudo conforme au compte. Le risque restant est la triche (les scores sont calculés dans le navigateur) : les règles la limitent sans l'éliminer.
+- **Mise en place :** publier `firestore.rules` (console Firebase > Firestore > Règles > Publier, ou `firebase deploy --only firestore:rules`) et autoriser le domaine du site dans Authentication > Paramètres > Domaines autorisés.
+- **Tests des règles :** `npm install` puis `npm test` (Node, Java et firebase-tools requis) lancent `tests/regles.test.mjs` sur l'émulateur.
+
 ## À faire
 
-- Comptes utilisateurs avec une base de données.
 - Attaques dans le jeu « Caractéristiques » (demande beaucoup d'appels à PokéAPI).
 
 ## Crédits

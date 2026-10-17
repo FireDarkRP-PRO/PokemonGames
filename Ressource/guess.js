@@ -75,7 +75,7 @@
     $('rep').select();
   }
   function fin() {
-    const b = Core.fin(mode, score); termine = true;
+    const b = Core.fin(mode, score, Number($('gen').value) === 0); termine = true;
     $('media').innerHTML = `<p class="final">${score} essais (${qs.length} = parfait)<br>Record : ${b}</p>`;
     $('info').textContent = ''; $('ok').textContent = 'Rejouer'; $('passe').hidden = true; $('rep').disabled = true;
   }

@@ -23,12 +23,14 @@
       ['autre-memory.html', 'Memory', 'Chacun son tour : celui qui trouve le plus de paires gagne.']]]
   ];
   const PAGES = new Set(CATS.flatMap(c => c[1].filter(j => !j[3]).map(j => j[0])));
-  let peer, estHote = false, hote = null, invite = null, manche = 0, pret = false, attente = [];
+  let peer, estHote = false, hote = null, invite = null, manche = 0, pret = false, attente = [], debutVic = [0, 0], enregistre = 0;
   let etat = { phase: 'salon', noms: ['Hôte', null], suggestion: null, partie: null, victoires: [0, 0], fini: false, manche: 0 };
   const moi = () => estHote ? 0 : 1;
   const nom = () => ($('nom').value.trim() || 'Joueur').slice(0, 16);
   const msg = t => $('msg').textContent = t;
   const montrer = id => { for (const s of ['accueil', 'salon', 'menu', 'duel']) $(s).hidden = s !== id; };
+  const jeuId = page => page.replace(/^(deviner|reflexion|autre)-/, '').replace(/\.html$/, '');
+  Core.surCompte(C => C.ecoute((u, pseudo) => { if (pseudo) $('nom').value = pseudo; })); // pseudo du compte par défaut
 
   // Menu des jeux (même organisation que l'accueil du site).
   const tuiles = new Map();
@@ -73,9 +75,14 @@
       $('rejouer').hidden = !estHote;
       const p = etat.partie;
       if (etat.manche !== manche && p && PAGES.has(p.page)) {
-        manche = etat.manche; pret = false; attente = [];
+        manche = etat.manche; pret = false; attente = []; debutVic = etat.victoires.slice();
         const q = new URLSearchParams({ seed: Number(p.seed), duel: 1, moi: moi(), debut: Number(p.debut) ? 1 : 0, n0: etat.noms[0], n1: etat.noms[1] });
         $('cadre').src = `${p.page}?${q}`;
+      }
+      if (etat.fini && enregistre !== etat.manche && p && window.Compte) { // résultat du duel sur le compte (si connecté)
+        enregistre = etat.manche;
+        const mes = etat.victoires[moi()] - debutVic[moi()], eux = etat.victoires[1 - moi()] - debutVic[1 - moi()];
+        window.Compte.enregistrerDuel(jeuId(p.page), mes > 0 ? 'victoire' : eux > 0 ? 'defaite' : 'nul').catch(e => console.warn(e));
       }
     }
   }

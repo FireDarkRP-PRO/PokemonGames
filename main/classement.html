@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Classements – Jeux Pokémon</title><link rel="stylesheet" href="../Ressource/style.css"></head>
+<body><main>
+<a class="retour" href="../index.html">Retour au menu</a>
+<h1>Classements</h1>
+<div class="saisie"><label>Jeu <select id="jeu"></select></label></div>
+<p id="msg" aria-live="polite">Chargement…</p>
+<section id="solo-bloc">
+<h2>Meilleurs records</h2>
+<p class="note">Le score est le nombre d'essais : le plus petit est le meilleur. Dans les jeux « Deviner », seules les parties avec toutes les générations sont classées.</p>
+<div class="tab-scroll"><table class="tab"><thead><tr><th>#</th><th>Joueur</th><th>Record</th><th>Parties</th><th>Moyenne</th></tr></thead><tbody id="solo"></tbody></table></div>
+</section>
+<section>
+<h2>Duels</h2>
+<div class="tab-scroll"><table class="tab"><thead><tr><th>#</th><th>Joueur</th><th>Victoires</th><th>Duels</th><th>Réussite</th></tr></thead><tbody id="duel"></tbody></table></div>
+</section>
+</main>
+<script src="../Ressource/core.js"></script>
+<script type="module" src="../Ressource/firebase.js"></script>
+<script src="../Ressource/classement.js"></script>
+</body></html>
