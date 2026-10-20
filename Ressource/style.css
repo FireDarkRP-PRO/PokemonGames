@@ -102,3 +102,4 @@ textarea{font:inherit;width:100%;padding:.6rem .9rem;border:3px solid var(--text
 .tous li{display:flex;flex-direction:column;align-items:center;gap:.1rem;background:#fff;border:2px solid var(--texte);border-radius:.6rem;padding:.2rem;font-size:.7rem;font-weight:700;text-align:center;word-break:break-word}
 .tous li.ici{background:#c9f0d2}
 .tous img{width:56px;height:56px}
+#code-bloc{align-items:center}

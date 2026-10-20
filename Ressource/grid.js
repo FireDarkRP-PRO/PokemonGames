@@ -133,16 +133,36 @@
   }
   function majSolo() {
     $('infos').textContent = `${DIFFS[partie.diff].nom} · ${partie.essais} essai(s)`;
+    $('code-aff').textContent = codeDe(partie);
     statut(partie.abandon ? 'Partie abandonnée : voici une solution possible. Touche une case pour voir toutes les possibilités.' : partie.fini ? 'Grille terminée ! Touche une case pour voir toutes les possibilités.' : 'Touche une case pour proposer un Pokémon.');
     $('abandon').hidden = partie.fini;
     $('resultat').hidden = !(partie.fini && !partie.abandon);
     if (!$('resultat').hidden) { $('bilan').textContent = `${partie.essais} essais (9 = parfait) · Record : ${partie.record}`; $('partage').textContent = partage(); }
   }
-  function demarrer(diff) {
-    const seed = Date.now() % 1e9, g = G.generer(diff, Core.rng(seed), true);
+  // ----- Code de grille : difficulté + graine + taille des données, pour rejouer la même grille (ex. « n-1x2y3z-zz ») -----
+  const LETTRES = { f: 'facile', n: 'normal', d: 'difficile' };
+  const codeDe = p => `${p.diff[0]}-${p.seed.toString(36)}-${pool.length.toString(36)}`;
+  const lienDe = p => `${location.origin}${location.pathname}?grille=${codeDe(p)}`;
+  function lireCode(txt) { // accepte un code seul ou un lien complet
+    const m = String(txt).trim().toLowerCase().match(/([fnd])-([0-9a-z]{1,8})-([0-9a-z]{1,3})/);
+    if (!m) return null;
+    const seed = parseInt(m[2], 36);
+    return Number.isSafeInteger(seed) && seed > 0 ? { diff: LETTRES[m[1]], seed, taille: parseInt(m[3], 36) } : null;
+  }
+  function demarrer(diff, imposee) { // imposee : { seed, taille } d'un code reçu
+    const seed = imposee ? imposee.seed : Date.now() % 1e9, g = G.generer(diff, Core.rng(seed), true);
     if (!g) { statut("Impossible de générer une grille : réessaie."); return; }
     partie = { diff, seed, lignes: g.lignes, colonnes: g.colonnes, cases: Array(9).fill(null), essais: 0, tentatives: Array(9).fill(0), fini: false, abandon: false, record: null };
     sauver(); afficherSolo();
+    if (imposee && imposee.taille !== pool.length) statut('Attention : les données du site ont changé depuis la création de ce code, la grille peut être différente de celle de ton ami.');
+  }
+  function jouerCode(txt) {
+    const c = lireCode(txt);
+    if (!c) { statut('Code invalide : il ressemble à n-1x2y3z-zz.'); return; }
+    const enCours = partie && !partie.fini;
+    if (enCours && partie.seed === c.seed && partie.diff === c.diff) { afficherSolo(); return; } // c'est déjà ta partie
+    if (enCours && partie.essais > 0 && !confirm('Une partie est en cours : la remplacer par cette grille ?')) return;
+    demarrer(c.diff, c);
   }
   function terminer() {
     partie.fini = true;
@@ -166,6 +186,12 @@
     demarrer(b.dataset.diff);
   };
   $('nouvelle').onclick = montrerChoix;
+  $('jouer-code').onclick = () => jouerCode($('code-grille').value);
+  $('code-grille').addEventListener('keydown', e => { if (e.key === 'Enter') jouerCode($('code-grille').value); });
+  $('copier-code').onclick = async () => {
+    try { await navigator.clipboard.writeText(lienDe(partie)); $('copier-code').textContent = 'Lien copié !'; } catch { prompt('Copie ce lien :', lienDe(partie)); }
+    setTimeout(() => { $('copier-code').textContent = 'Copier le lien'; }, 2000);
+  };
   $('abandon').onclick = () => {
     if (!confirm('Abandonner et voir une solution ? Aucun score ne sera enregistré.')) return;
     const sol = G.solution(casesIdx);
@@ -173,7 +199,7 @@
     partie.fini = partie.abandon = true; sauver(); fermer(); dessiner(); majSolo();
   };
   $('copier').onclick = async () => {
-    const texte = `${$('partage').textContent}\n${location.origin}${location.pathname}`;
+    const texte = `${$('partage').textContent}\n${lienDe(partie)}`; // le lien rouvre la même grille
     try { await navigator.clipboard.writeText(texte); $('copier').textContent = 'Copié !'; } catch { prompt('Copie ce texte :', texte); }
   };
 
@@ -211,12 +237,14 @@
     if (!g) { statut('Impossible de générer la grille.'); return; }
     lignes = g.lignes; colonnes = g.colonnes; calculer();
     duel = GridMoteur.duel(valides);
-    $('choix-diff').hidden = true; $('jeu').hidden = false; $('actions').hidden = true; $('legende').hidden = false;
+    $('choix-diff').hidden = true; $('jeu').hidden = false; $('actions').hidden = true; $('legende').hidden = false; $('code-bloc').hidden = true;
     $('infos').textContent = `Difficulté : ${DIFFS[diff].nom}`;
     dessiner(); D.ecouter(appliquer, apres); apres();
   } else {
     const s = Core.Store.get(SAUVE, null);
     if (sauvegardeValide(s)) partie = s;
-    if (partie && !partie.fini) afficherSolo(); else montrerChoix();
+    const recu = new URLSearchParams(location.search).get('grille'); // lien partagé : ?grille=code
+    if (recu) { history.replaceState(null, '', location.pathname); montrerChoix(); jouerCode(recu); }
+    else if (partie && !partie.fini) afficherSolo(); else montrerChoix();
   }
 })();

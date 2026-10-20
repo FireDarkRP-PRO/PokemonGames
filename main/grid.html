@@ -8,10 +8,13 @@
 <section id="choix-diff" class="lobby" hidden>
 <p class="intro">Trouve un Pokémon pour chaque case : il doit respecter à la fois le critère de la ligne et celui de la colonne. Un Pokémon ne peut servir qu'une fois. Ton score est le nombre d'essais : 9 est parfait.</p>
 <div class="saisie"><button type="button" data-diff="facile">Facile</button><button type="button" data-diff="normal">Normal</button><button type="button" data-diff="difficile">Difficile</button></div>
+<p class="note">Un ami t'a envoyé un code de grille ? Colle-le ici (ou colle son lien) pour jouer la même grille.</p>
+<div class="saisie"><input id="code-grille" autocomplete="off" placeholder="Code de grille (ex. n-1x2y3z-zz)"><button id="jouer-code" type="button" class="sec">Jouer cette grille</button></div>
 <div id="reprise" class="saisie"></div>
 </section>
 <section id="jeu" class="lobby" hidden>
 <div class="barre"><span id="infos"></span><span id="temps"></span></div>
+<div id="code-bloc" class="saisie"><span>Code de la grille : <strong id="code-aff"></strong></span><button id="copier-code" type="button" class="sec">Copier le lien</button></div>
 <div id="legende" class="legende-duel" hidden></div>
 <div id="grille" class="grid3"></div>
 <div id="resultat" hidden>
