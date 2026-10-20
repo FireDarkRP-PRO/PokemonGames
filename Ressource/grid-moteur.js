@@ -8,8 +8,8 @@ const GridMoteur = (() => {
     ...Array.from({ length: 9 }, (_, i) => ({ id: 'gen:' + (i + 1), nom: 'Gén ' + (i + 1), niv: 1, ok: p => p.gen === i + 1 })),
     { id: 'leg', nom: 'Légendaire', niv: 2, ok: p => p.legendaire },
     { id: 'fab', nom: 'Fabuleux', niv: 2, ok: p => p.fabuleux },
-    { id: 'st1', nom: '1er stade', niv: 2, ok: p => p.stade === 1 && !p.final },
-    { id: 'st2', nom: '2e stade', niv: 2, ok: p => p.stade === 2 && !p.final },
+    { id: 'st1', nom: '1er stade', niv: 2, ok: p => p.stade === 1 }, // y compris un Pokémon sans évolution
+    { id: 'st2', nom: '2e stade', niv: 2, ok: p => p.stade === 2 }, // y compris un Pokémon pleinement évolué au 2e stade
     { id: 'stf', nom: 'Pleinement évolué', niv: 2, ok: p => p.final },
     { id: 'starter', nom: 'Starter', niv: 2, rare: true, ok: p => p.starter },
     { id: 'mega', nom: 'Méga-évolution', niv: 3, rare: true, ok: p => p.forme === 'mega' },
