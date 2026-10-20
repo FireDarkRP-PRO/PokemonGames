@@ -12,6 +12,8 @@ et un champ "base" (nom du Pokémon de base) ; pour les Pokémon de base, "forme
 Champs de statut (hérités par les formes) : "legendaire", "fabuleux", "bebe", "starter" (lignée complète d'un
 starter de départ), "final" (pleinement évolué, y compris un Pokémon sans évolution) et "stade" (1, 2, 3...).
 Les formes sans image restent dans le fichier avec "image": null.
+"ligne" est l'identifiant de la famille d'évolution (Salamèche, Reptincel, Dracaufeu et ses formes : même valeur) ;
+le niveau « Expert » de Pokémon Grid s'en sert pour interdire deux Pokémon de la même lignée.
 Chaque forme a aussi un champ "suffixe" (celui de PokéAPI : "rapid-strike", "pom-pom", "totem"...) que Pokémon Grid
 utilise pour écarter les formes qui ne sont pas de vrais Pokémon (casquettes de Pikachu, Totems...).
 À la fin, le script liste les formes dont le nom français n'a pas été trouvé sur PokéAPI (nom avec des mots anglais).
@@ -124,6 +126,7 @@ def entree(sp, p, nom, forme=None, base=None, suffixe=None):
         'nom': nom,
         'forme': forme,
         'gen': int(sp['generation']['url'].rstrip('/').split('/')[-1]),
+        'ligne': int(sp['evolution_chain']['url'].rstrip('/').split('/')[-1]) if sp.get('evolution_chain') else -sp['id'],
         'legendaire': bool(sp.get('is_legendary')),
         'fabuleux': bool(sp.get('is_mythical')),
         'bebe': bool(sp.get('is_baby')),

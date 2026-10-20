@@ -18,7 +18,8 @@
       ['reflexion-intrus.html', "Quel est l'intrus ?", 'Trois Pokémon partagent un type, pas le quatrième.'],
       ['grid.html?diff=facile', 'Pokémon Grid : Facile', 'Morpion de Pokémon : trouve un Pokémon par case, vole celles de ton adversaire.'],
       ['grid.html?diff=normal', 'Pokémon Grid : Normal', 'Même jeu, avec des critères plus variés (statut, stade, starter).'],
-      ['grid.html?diff=difficile', 'Pokémon Grid : Difficile', 'Même jeu, avec Méga, Gigamax, formes régionales et cases à Pokémon unique.']]],
+      ['grid.html?diff=difficile', 'Pokémon Grid : Difficile', 'Même jeu, avec Méga, Gigamax, formes régionales et cases à Pokémon unique.'],
+      ['grid.html?diff=expert', 'Pokémon Grid : Expert', 'Même jeu, mais deux Pokémon de la même lignée évolutive ne peuvent pas être dans la grille.']]],
     ['Autre', [
       ['autre-shiny.html', 'Lequel est le shiny ?', 'Deux images, une seule est chromatique.'],
       ['autre-quiestce.html', 'Qui est-ce ? Groupe aléatoire', '30 Pokémon tirés au hasard : devine le Pokémon secret de ton adversaire.'],

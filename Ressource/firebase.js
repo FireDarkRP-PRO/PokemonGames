@@ -19,7 +19,7 @@ const JEUX = {
   silhouette: 'Silhouette', cri: 'Cri', pixel: 'Image pixelisée', description: 'Description du Pokédex', caracteristiques: 'Caractéristiques',
   pokedle: 'Pokédle', plusmoins: 'Plus ou moins', types: 'Efficacité des types', intrus: "Quel est l'intrus ?",
   shiny: 'Lequel est le shiny ?', memory: 'Memory', quiestce: 'Qui est-ce ? (aléatoire)', 'quiestce-perso': 'Qui est-ce ? (personnalisé)',
-  'grid-facile': 'Pokémon Grid (Facile)', 'grid-normal': 'Pokémon Grid (Normal)', 'grid-difficile': 'Pokémon Grid (Difficile)', grid: 'Pokémon Grid (duel)'
+  'grid-facile': 'Pokémon Grid (Facile)', 'grid-normal': 'Pokémon Grid (Normal)', 'grid-difficile': 'Pokémon Grid (Difficile)', 'grid-expert': 'Pokémon Grid (Expert)', grid: 'Pokémon Grid (duel)'
 };
 const PSEUDO = /^[A-Za-z0-9_-]{3,16}$/;
 const email = p => p.toLowerCase() + '@joueurs.pokemongames.invalid';

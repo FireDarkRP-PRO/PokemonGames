@@ -8,13 +8,23 @@
   catch { statut('pokemon.json introuvable : lance outils/generer_pokemon.py, puis commit Ressource/pokemon.json.'); return; }
   const G = GridMoteur.contexte(data), pool = G.pool;
   const parId = new Map(pool.map(p => [p.id, p])), normes = pool.map(p => Core.norm(p.nom));
+  const ligneDe = id => (parId.get(id) || {}).ligne;
+  const donneesOk = diff => !DIFFS[diff].ligne || pool.every(p => p.ligne !== undefined); // niveau Expert : demande le champ « ligne »
+  const MSG_DONNEES = 'Le niveau Expert demande un pokemon.json régénéré (champ « ligne ») : relance outils/generer_pokemon.py.';
   const nomDe = id => (parId.get(id) || { nom: '?' }).nom, crit = id => G.critere(id).nom;
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
   const image = p => p.image ? `<img src="${p.image}" alt="" loading="lazy">` : '<span class="sans-image">?</span>';
   const log = t => $('journal').prepend(el('li', '', t));
   let lignes = [], colonnes = [], valides = [], casesIdx = [], caseOuverte = null;
   let partie = null; // solo
-  let duel = null, tourPrec = null, minuteur = null, fin = 0; // duel
+  let duel = null, tourPrec = null, minuteur = null, fin = 0, regleDuel = false; // duel (regleDuel : niveau Expert)
+  // Lignées déjà présentes dans les autres cases (niveau Expert) : un Pokémon de la même lignée est refusé.
+  const lignesPrises = c => {
+    const s = new Set();
+    if (!(D.actif ? regleDuel : partie && DIFFS[partie.diff].ligne)) return s;
+    for (let k = 0; k < 9; k++) { const x = occupant(k); if (k !== c && x != null) s.add(ligneDe(x)); }
+    return s;
+  };
   const lieu = c => `${crit(lignes[Math.floor(c / 3)])} × ${crit(colonnes[c % 3])}`;
   function calculer() { casesIdx = G.cases(lignes, colonnes); valides = casesIdx.map(a => new Set(a.map(i => pool[i].id))); }
   const occupant = c => D.actif ? duel.poke[c] : partie.cases[c];
@@ -88,10 +98,10 @@
     const ul = $('sugg'), q = Core.norm($('p-champ').value);
     ul.innerHTML = '';
     if (!q || $('p-saisie').hidden) return;
-    const exclus = new Set(D.actif ? duel.pris : partie.cases.filter(x => x != null));
+    const exclus = new Set(D.actif ? duel.pris : partie.cases.filter(x => x != null)), lignes = lignesPrises(caseOuverte);
     if (D.actif) for (const x of duel.histo[caseOuverte]) exclus.add(x.id);
     const trouves = [];
-    pool.forEach((p, i) => { if (!exclus.has(p.id) && normes[i].includes(q)) trouves.push([normes[i].startsWith(q) ? 0 : 1, p]); });
+    pool.forEach((p, i) => { if (!exclus.has(p.id) && !lignes.has(p.ligne) && normes[i].includes(q)) trouves.push([normes[i].startsWith(q) ? 0 : 1, p]); });
     trouves.sort((a, b) => a[0] - b[0] || a[1].nom.localeCompare(b[1].nom, 'fr'));
     for (const [, p] of trouves.slice(0, 8)) {
       const li = el('li'), b = el('button', 'sg');
@@ -110,12 +120,13 @@
     if (c === null || !parId.has(id)) return;
     if (D.actif) {
       const r = duel.refus(c, id, D.moi);
-      if (r) { $('p-msg').textContent = { 'deja-pose': 'Ce Pokémon est déjà dans une case.', 'ta-case': 'Cette case est déjà à toi.', 'deja-pour-case': 'Ce Pokémon a déjà été proposé pour cette case.' }[r] || 'Coup impossible.'; return; }
+      if (r) { $('p-msg').textContent = { 'deja-pose': 'Ce Pokémon est déjà dans une case.', 'meme-ligne': 'Un Pokémon de la même lignée évolutive est déjà dans la grille.', 'ta-case': 'Cette case est déjà à toi.', 'deja-pour-case': 'Ce Pokémon a déjà été proposé pour cette case.' }[r] || 'Coup impossible.'; return; }
       fermer(); D.coup({ c, p: id }, appliquer, apres); // un coup raté fait perdre le tour
       return;
     }
     if (partie.fini) return;
     if (partie.cases.includes(id)) { $('p-msg').textContent = 'Ce Pokémon est déjà dans une autre case (sans coût).'; return; }
+    if (lignesPrises(c).has(ligneDe(id))) { $('p-msg').textContent = 'Un Pokémon de la même lignée évolutive est déjà dans la grille (sans coût).'; return; }
     partie.essais++; partie.tentatives[c]++;
     if (!valides[c].has(id)) { $('p-msg').textContent = `${nomDe(id)} ne correspond pas (+1 essai).`; sauver(); majSolo(); return; }
     partie.cases[c] = id; sauver(); fermer(); dessiner(); majSolo();
@@ -140,16 +151,17 @@
     if (!$('resultat').hidden) { $('bilan').textContent = `${partie.essais} essais (9 = parfait) · Record : ${partie.record}`; $('partage').textContent = partage(); }
   }
   // ----- Code de grille : difficulté + graine + taille des données, pour rejouer la même grille (ex. « n-1x2y3z-zz ») -----
-  const LETTRES = { f: 'facile', n: 'normal', d: 'difficile' };
+  const LETTRES = { f: 'facile', n: 'normal', d: 'difficile', e: 'expert' };
   const codeDe = p => `${p.diff[0]}-${p.seed.toString(36)}-${pool.length.toString(36)}`;
   const lienDe = p => `${location.origin}${location.pathname}?grille=${codeDe(p)}`;
   function lireCode(txt) { // accepte un code seul ou un lien complet
-    const m = String(txt).trim().toLowerCase().match(/([fnd])-([0-9a-z]{1,8})-([0-9a-z]{1,3})/);
+    const m = String(txt).trim().toLowerCase().match(/([fnde])-([0-9a-z]{1,8})-([0-9a-z]{1,3})/);
     if (!m) return null;
     const seed = parseInt(m[2], 36);
     return Number.isSafeInteger(seed) && seed > 0 ? { diff: LETTRES[m[1]], seed, taille: parseInt(m[3], 36) } : null;
   }
   function demarrer(diff, imposee) { // imposee : { seed, taille } d'un code reçu
+    if (!donneesOk(diff)) { statut(MSG_DONNEES); return; }
     const seed = imposee ? imposee.seed : Date.now() % 1e9, g = G.generer(diff, Core.rng(seed), true);
     if (!g) { statut("Impossible de générer une grille : réessaie."); return; }
     partie = { diff, seed, lignes: g.lignes, colonnes: g.colonnes, cases: Array(9).fill(null), essais: 0, tentatives: Array(9).fill(0), fini: false, abandon: false, record: null };
@@ -194,7 +206,7 @@
   };
   $('abandon').onclick = () => {
     if (!confirm('Abandonner et voir une solution ? Aucun score ne sera enregistré.')) return;
-    const sol = G.solution(casesIdx);
+    const sol = G.solution(casesIdx, partie.diff);
     if (sol) partie.cases = sol.map(i => pool[i].id);
     partie.fini = partie.abandon = true; sauver(); fermer(); dessiner(); majSolo();
   };
@@ -233,10 +245,12 @@
   // ----- Démarrage -----
   if (D.actif) {
     const demande = new URLSearchParams(location.search).get('diff'), diff = DIFFS[demande] ? demande : 'normal';
-    const g = G.generer(diff, Core.rng(Core.seed()), false);
+    if (!donneesOk(diff)) { statut(MSG_DONNEES); return; }
+    const g = G.generer(diff, Core.rng(Core.seed()), !!DIFFS[diff].ligne); // Expert : grille remplissable avec une lignée par case
     if (!g) { statut('Impossible de générer la grille.'); return; }
     lignes = g.lignes; colonnes = g.colonnes; calculer();
-    duel = GridMoteur.duel(valides);
+    regleDuel = !!DIFFS[diff].ligne;
+    duel = GridMoteur.duel(valides, regleDuel ? ligneDe : null);
     $('choix-diff').hidden = true; $('jeu').hidden = false; $('actions').hidden = true; $('legende').hidden = false; $('code-bloc').hidden = true;
     $('infos').textContent = `Difficulté : ${DIFFS[diff].nom}`;
     dessiner(); D.ecouter(appliquer, apres); apres();

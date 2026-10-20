@@ -21,7 +21,9 @@ const GridMoteur = (() => {
   const DIFFS = {
     facile: { nom: 'Facile', niv: 1, min: 10, force: null },
     normal: { nom: 'Normal', niv: 2, min: 3, force: c => c.niv === 2 },
-    difficile: { nom: 'Difficile', niv: 3, min: 1, force: c => c.rare }
+    difficile: { nom: 'Difficile', niv: 3, min: 1, force: c => c.rare },
+    // Expert : critères du niveau Normal, mais deux Pokémon de la même lignée évolutive (champ « ligne ») ne peuvent pas être dans la grille.
+    expert: { nom: 'Expert', niv: 2, min: 3, force: null, ligne: true }
   };
   const ALIGNEMENTS = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
   // Pokémon jouables : de base et toutes les formes alternatives (Méga, Primo, Gigamax, régionales, mais aussi styles,
@@ -60,20 +62,20 @@ const GridMoteur = (() => {
       }
       return res;
     };
-    // Appariement biparti : un Pokémon différent par case, ou null si impossible.
-    const solution = valides => {
-      const prise = new Map();
+    // Appariement biparti : un Pokémon différent par case (et, au niveau Expert, une lignée différente par case), ou null si impossible.
+    const solution = (valides, diff) => {
+      const cle = diff && DIFFS[diff].ligne ? i => pool[i].ligne : i => i;
+      const prise = new Map(), res = Array(9);
       const chercher = (c, vus) => {
         for (const i of valides[c]) {
-          if (vus.has(i)) continue;
-          vus.add(i);
-          if (!prise.has(i) || chercher(prise.get(i), vus)) { prise.set(i, c); return true; }
+          const k = cle(i);
+          if (vus.has(k)) continue;
+          vus.add(k);
+          if (!prise.has(k) || chercher(prise.get(k), vus)) { prise.set(k, c); res[c] = i; return true; }
         }
         return false;
       };
       for (let c = 0; c < 9; c++) if (!chercher(c, new Set())) return null;
-      const res = Array(9);
-      for (const [i, c] of prise) res[c] = i;
       return res;
     };
     // solo = true : la grille est garantie remplissable avec 9 Pokémon différents.
@@ -94,7 +96,7 @@ const GridMoteur = (() => {
         }
         let lignes = L.map(c => c.id), colonnes = C.map(c => c.id);
         if (rng() < 0.5) [lignes, colonnes] = [colonnes, lignes];
-        if (solo && !solution(cases(lignes, colonnes))) continue;
+        if (solo && !solution(cases(lignes, colonnes), diff)) continue;
         return { lignes, colonnes };
       }
       return null;
@@ -103,12 +105,14 @@ const GridMoteur = (() => {
   }
 
   // Règles du duel (morpion) : valides[c] = ensemble des id de Pokémon valides pour la case c.
-  function duel(valides) {
+  // ligneDe (optionnel, niveau Expert) : id de Pokémon -> lignée ; deux cases ne peuvent pas avoir la même lignée.
+  function duel(valides, ligneDe) {
     const proprio = Array(9).fill(null), poke = Array(9).fill(null), pris = new Set();
     const histo = Array.from({ length: 9 }, () => []);
     const refus = (c, id, par) => {
       if (!Number.isInteger(c) || c < 0 || c > 8 || id == null) return 'invalide';
       if (pris.has(id)) return 'deja-pose';
+      if (ligneDe && poke.some((x, k) => k !== c && x !== null && ligneDe(x) === ligneDe(id))) return 'meme-ligne';
       if (proprio[c] === par) return 'ta-case';
       if (histo[c].some(h => h.id === id)) return 'deja-pour-case';
       return null;
