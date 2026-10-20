@@ -12,6 +12,9 @@ et un champ "base" (nom du Pokémon de base) ; pour les Pokémon de base, "forme
 Champs de statut (hérités par les formes) : "legendaire", "fabuleux", "bebe", "starter" (lignée complète d'un
 starter de départ), "final" (pleinement évolué, y compris un Pokémon sans évolution) et "stade" (1, 2, 3...).
 Les formes sans image restent dans le fichier avec "image": null.
+Chaque forme a aussi un champ "suffixe" (celui de PokéAPI : "rapid-strike", "pom-pom", "totem"...) que Pokémon Grid
+utilise pour écarter les formes qui ne sont pas de vrais Pokémon (casquettes de Pikachu, Totems...).
+À la fin, le script liste les formes dont le nom français n'a pas été trouvé sur PokéAPI (nom avec des mots anglais).
 
 Relis ensuite le diff et commit le fichier quand de nouveaux Pokémon sortent.
 """
@@ -43,6 +46,15 @@ SEULE_FORME_QUI_EVOLUE = {
     'farfetchd': 'galar', 'mr-mime': 'galar', 'corsola': 'galar', 'linoone': 'galar',
     'qwilfish': 'hisui', 'basculin': 'white-striped',
 }
+# Noms français corrigés (PokéAPI se trompe ou mélange le nom anglais et le nom français de l'espèce).
+RENOMMER = {
+    'Diagla Originel': 'Dialga Originel',
+    'Calyrex Cavalier du Froid': 'Sylveroy Cavalier du Froid',
+    'Calyrex Cavalier d’Effroi': 'Sylveroy Cavalier d’Effroi',
+}
+# Mots de suffixe traduits, et mots déjà portés par le nom (Méga, Gigamax, Primo).
+MOTS = {'female': 'femelle', 'male': 'mâle'}
+IGNORES = {'mega', 'gmax', 'primal'}
 
 
 def get(url, essais=3):
@@ -66,30 +78,40 @@ def categorie(suffixe):
     t = suffixe.split('-')
     if 'gmax' in t:  # y compris « amped-gmax », « single-strike-gmax »...
         return 'gmax'
+    if 'mega' in t and not ({'zen', 'totem', 'cap'} & set(t)):  # y compris « female-mega », « curly-mega »...
+        return 'mega'
     if t[0] in ('mega', 'primal', *REGIONS) and not ({'zen', 'totem', 'cap'} & set(t)):  # combat, totems, casquettes : « autre »
         return t[0]
     return 'autre'
 
 
+def mots(suffixe):
+    """Suffixe PokéAPI lisible : « female-mega » -> « femelle »."""
+    return ' '.join(MOTS.get(x, x) for x in suffixe.split('-') if x not in IGNORES)
+
+
 def nom_forme(nom, suffixe, form):
-    """Nom français de la forme : celui de PokéAPI s'il existe, sinon reconstruit."""
-    fr = next((n['name'] for n in form['names'] if n['language']['name'] == 'fr'), None)
+    """Nom français de la forme et un booléen : False si le nom garde des mots anglais (à relire)."""
+    fr = next((n['name'] for n in form.get('names', []) if n['language']['name'] == 'fr'), None)
     if fr and fr != nom:
-        return fr
+        return fr, True
     t = suffixe.split('-')
+    if categorie(suffixe) == 'autre':  # styles, coloris, formes de combat... : nom court de la forme, précédé de l'espèce
+        court = next((n['name'] for n in form.get('form_names', []) if n['language']['name'] == 'fr'), None)
+        if court and court != nom:
+            return (court if nom.lower() in court.lower() else f'{nom} {court}'), True
     if 'gmax' in t:
         reste = ' '.join(x for x in t if x != 'gmax')
-        return f'{nom} Gigamax' + (f' ({reste})' if reste else '')
-    if t[0] == 'mega':
-        return f'Méga-{nom}' + (f' {t[1].upper()}' if len(t) > 1 else '')
+        return f'{nom} Gigamax' + (f' ({reste})' if reste else ''), True
+    if 'mega' in t:
+        reste = [x.upper() if len(x) == 1 else MOTS.get(x, x) for x in t if x != 'mega']
+        return f'Méga-{nom}' + (' ' + ' '.join(reste) if reste else ''), True
     if t[0] == 'primal':
-        return f'Primo-{nom}'
-    if t[0] == 'gmax':
-        return f'{nom} Gigamax'
+        return f'Primo-{nom}', True
     if t[0] in REGIONS:
         reste = ' '.join(t[1:])
-        return f'{nom} {REGIONS[t[0]]}' + (f' ({reste})' if reste else '')
-    return f'{nom} ({suffixe.replace("-", " ")})'
+        return f'{nom} {REGIONS[t[0]]}' + (f' ({reste})' if reste else ''), True
+    return f'{nom} ({mots(suffixe)})', False
 
 
 def entree(sp, p, nom, forme=None, base=None, suffixe=None):
@@ -136,7 +158,11 @@ def fiches(s):
             continue
         suf = p['name'][len(sp['name']) + 1:] if p['name'].startswith(sp['name'] + '-') else p['name']
         form = get(p['forms'][0]['url']) if p['forms'] else {'names': []}
-        out.append(entree(sp, p, nom_forme(nom, suf, form), categorie(suf), nom, suf))  # image possiblement null
+        nom_f, francais = nom_forme(nom, suf, form)
+        e = entree(sp, p, RENOMMER.get(nom_f, nom_f), categorie(suf), nom, suf)  # image possiblement null
+        if not francais:
+            e['_anglais'] = True
+        out.append(e)
     return out
 
 
@@ -160,10 +186,11 @@ def main():
         return n in STARTERS or (pere.get(n) is not None and starter(pere[n]))
 
     vus = set()
+    anglais = []
     for p in out:
         if p['forme']:  # noms toujours uniques : ils servent de réponse dans les jeux
             if p['nom'] in vus:
-                p['nom'] += f" ({p['_suf'].replace('-', ' ')})"
+                p['nom'] += f" ({mots(p['_suf']) or p['_suf']})"
             if p['nom'] in vus:
                 p['nom'] += f" #{p['id']}"
         vus.add(p['nom'])
@@ -173,10 +200,18 @@ def main():
         p['starter'] = starter(p['_en'])
         p['stade'] = stade(p.pop('_en'))
         p.pop('_pere')
-        p.pop('_suf')
+        suf = p.pop('_suf')
+        if p['forme']:
+            p['suffixe'] = suf
+        if p.pop('_anglais', False):
+            anglais.append(p['nom'])
     OUT.write_text(json.dumps(out, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     formes = sum(1 for p in out if p['forme'])
     print(f'\n{len(out)} entrées dont {formes} formes alternatives, écrites dans {OUT}')
+    if anglais:
+        print(f'{len(anglais)} formes ont gardé un nom avec des mots anglais (à corriger dans RENOMMER si besoin) :')
+        for n in anglais:
+            print('  -', n)
 
 
 if __name__ == '__main__':

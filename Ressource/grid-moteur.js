@@ -24,8 +24,15 @@ const GridMoteur = (() => {
     difficile: { nom: 'Difficile', niv: 3, min: 1, force: c => c.rare }
   };
   const ALIGNEMENTS = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-  // Pokémon jouables : de base, Méga, Gigamax et formes régionales (pas les casquettes de Pikachu, formes de combat, etc.).
-  const garder = p => (!p.forme || p.forme === 'mega' || p.forme === 'gmax' || REGIONS.includes(p.forme)) && !/Casquette/.test(p.nom);
+  // Pokémon jouables : de base et toutes les formes alternatives (Méga, Primo, Gigamax, régionales, mais aussi styles,
+  // coloris et formes diverses : Shifours Style Mille Poings, les Plumeline, Necrozma Ailes de l'Aurore...), sauf :
+  //  - les formes qui ne sont pas de vrais Pokémon (suffixe PokéAPI de pokemon.json) : casquettes et costumes de Pikachu,
+  //    Pikachu et Évoli Partenaire, Totems (« Dominant »), Éthernatos Infinimax, Zygarde « Générateur » (même forme que 10 % / 50 %) ;
+  //  - les espèces dont les formes ne sont que des couleurs : Météno (13 formes identiques), seule sa forme de base reste.
+  const SUFFIXES_EXCLUS = ['cap', 'totem', 'rock-star', 'belle', 'pop-star', 'phd', 'libre', 'cosplay', 'starter', 'eternamax', 'power-construct'];
+  const BASES_SANS_FORMES = ['Météno'];
+  const garder = p => !p.forme || (!BASES_SANS_FORMES.includes(p.base) && !/Casquette/.test(p.nom)
+    && !SUFFIXES_EXCLUS.some(x => ('-' + (p.suffixe || '') + '-').includes('-' + x + '-')));
 
   function contexte(data) {
     const pool = data.filter(garder);

@@ -62,6 +62,19 @@
     histo.hidden = $('p-histo-t').hidden = !liste.length;
     const ok = peutJouer(c);
     $('p-saisie').hidden = !ok;
+    const termine = D.actif ? D.fini : partie.fini, tous = $('p-tous'); // partie finie : toutes les possibilités de la case
+    tous.innerHTML = '';
+    tous.hidden = $('p-tous-t').hidden = !termine;
+    if (termine) {
+      const liste = casesIdx[c].map(i => pool[i]);
+      $('p-tous-t').textContent = `${liste.length} possibilité${liste.length > 1 ? 's' : ''} pour cette case :`;
+      for (const p of liste) {
+        const li = el('li', p.id === id ? 'ici' : '');
+        li.innerHTML = image(p) + `<span>${p.nom}</span>`;
+        tous.append(li);
+      }
+      tous.scrollTop = 0;
+    }
     if (D.actif && !ok) $('p-msg').textContent = D.fini ? '' : duel.proprio[c] === D.moi ? 'Cette case est déjà à toi.' : "Ce n'est pas ton tour.";
     majSuggestions();
   }
@@ -120,7 +133,7 @@
   }
   function majSolo() {
     $('infos').textContent = `${DIFFS[partie.diff].nom} · ${partie.essais} essai(s)`;
-    statut(partie.abandon ? 'Partie abandonnée : voici une solution possible.' : partie.fini ? 'Grille terminée !' : 'Touche une case pour proposer un Pokémon.');
+    statut(partie.abandon ? 'Partie abandonnée : voici une solution possible. Touche une case pour voir toutes les possibilités.' : partie.fini ? 'Grille terminée ! Touche une case pour voir toutes les possibilités.' : 'Touche une case pour proposer un Pokémon.');
     $('abandon').hidden = partie.fini;
     $('resultat').hidden = !(partie.fini && !partie.abandon);
     if (!$('resultat').hidden) { $('bilan').textContent = `${partie.essais} essais (9 = parfait) · Record : ${partie.record}`; $('partage').textContent = partage(); }
@@ -184,7 +197,7 @@
     minuteur = setInterval(tic, 250); tic();
   }
   function apres() {
-    dessiner(); rendrePanneau(); statut(D.statut());
+    dessiner(); rendrePanneau(); statut(D.statut() + (D.fini ? ' Touche une case pour voir toutes les possibilités.' : ''));
     const l = $('legende'); l.innerHTML = '';
     for (const j of [0, 1]) l.append(el('span', 'joueur p' + j, `${D.noms[j]} : ${duel.proprio.filter(x => x === j).length} case(s)`));
     if (D.fini) { clearInterval(minuteur); $('temps').textContent = ''; }

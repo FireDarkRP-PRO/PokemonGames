@@ -57,9 +57,9 @@ Le script écrit directement dans `Ressource/pokemon.json` (compte quelques minu
 
 Pour chaque Pokémon, le fichier contient : numéro, nom français, génération, types, talents, taille, poids, total des stats, description du Pokédex, stade d'évolution, indicateur full évolué (`final`, vrai aussi pour un Pokémon sans évolution), statuts (`legendaire`, `fabuleux`, `bebe`, `starter`), images (normale et shiny) et cri.
 
-Le fichier contient aussi toutes les formes alternatives (Méga, régionales, Gigamax, etc.), chacune comme une entrée à part avec son propre nom, ses types et ses stats. Le champ `forme` donne sa catégorie (`mega`, `primal`, `gmax`, `alola`, `galar`, `hisui`, `paldea` ou `autre`) et `base` le nom du Pokémon de base. Pour un Pokémon de base, `forme` vaut `null`. `id` est unique et `num` est le numéro du Pokédex.
+Le fichier contient aussi toutes les formes alternatives (Méga, régionales, Gigamax, etc.), chacune comme une entrée à part avec son propre nom, ses types et ses stats. Le champ `forme` donne sa catégorie (`mega`, `primal`, `gmax`, `alola`, `galar`, `hisui`, `paldea` ou `autre`) et `base` le nom du Pokémon de base. Pour un Pokémon de base, `forme` vaut `null`. `id` est unique et `num` est le numéro du Pokédex. Chaque forme a aussi un champ `suffixe` (celui de PokéAPI, par exemple `rapid-strike` ou `totem`) que Pokémon Grid utilise pour écarter les formes qui ne sont pas de vrais Pokémon. À la fin de la génération, le script liste les formes dont le nom français n'a pas été trouvé (nom avec des mots anglais) : corrige-les dans `RENOMMER`, en haut du script.
 
-Pour l'instant, les jeux ignorent ces formes : le filtre se trouve dans `Core.load()` (`Ressource/core.js`).
+Seul Pokémon Grid utilise ces formes (`Core.load(true)`) ; les autres jeux les ignorent : le filtre se trouve dans `Core.load()` (`Ressource/core.js`).
 
 ## Tester en local
 
@@ -114,11 +114,12 @@ Dans tous les jeux solo, le score est le nombre d'essais : plus il est bas, mieu
 
 ## Pokémon Grid
 
-Page `main/grid.html` (menu Réflexion). Une grille 3×3 : chaque ligne et colonne a un critère (type, génération, légendaire, fabuleux, stade d'évolution, starter, Méga, Gigamax, forme régionale) et chaque case demande un Pokémon qui valide les deux. Les Méga, Gigamax et formes régionales sont des Pokémon à part entière ; ils héritent de la génération, du stade, du statut starter et légendaire de leur espèce.
+Page `main/grid.html` (menu Réflexion). Une grille 3×3 : chaque ligne et colonne a un critère (type, génération, légendaire, fabuleux, stade d'évolution, starter, Méga, Gigamax, forme régionale) et chaque case demande un Pokémon qui valide les deux. Toutes les formes alternatives (Méga, Primo, Gigamax, régionales, mais aussi styles, coloris et formes diverses comme Shifours Style Mille Poings ou les 4 Plumeline) sont des Pokémon à part entière ; elles héritent de la génération, du stade, du statut starter et légendaire de leur espèce. Sont écartés, dans `grid-moteur.js` (`SUFFIXES_EXCLUS`, `BASES_SANS_FORMES`) : casquettes et costumes de Pikachu, Pikachu et Évoli Partenaire, Totems, Éthernatos Infinimax, Zygarde Générateur et les formes Météno (simples couleurs).
 
 - **Difficultés :** Facile (types et générations, au moins 10 Pokémon valides par case), Normal (au moins 3, avec statut, stade et starter), Difficile (au moins 1, avec au moins un critère rare : starter, Méga, Gigamax ou forme régionale).
 - **Solo :** score = nombre d'essais (9 = parfait). Un nom hors liste ou un Pokémon déjà posé est refusé sans coût, retirer un Pokémon est gratuit. La grille est garantie remplissable avec 9 Pokémon différents. La partie est sauvegardée (localStorage), on peut abandonner pour voir une solution (sans score) et copier un résultat en emojis. Un record par difficulté (`grid-facile`, `grid-normal`, `grid-difficile`).
 - **Duel (salon) :** morpion à tour de rôle sur la même grille, 1 min 30 par tour. Un Pokémon valide sur une case libre la prend, sur une case adverse la vole (avec un Pokémon jamais proposé pour cette case). Un Pokémon invalide fait perdre le tour ; un Pokémon déjà posé ou déjà proposé pour la case est refusé sans perdre le tour. Trois cases alignées gagnent ; si la grille est pleine, celui qui a le plus de cases gagne (9 cases : pas d'égalité). Le détail des Pokémon proposés est visible en touchant une case. Pas de score, seulement les victoires (`grid`).
+- **Fin de partie :** une fois la grille terminée (réussite ou abandon en solo, fin du duel), toucher une case affiche toutes les possibilités de cette case (le Pokémon placé est en vert).
 - **Code :** `Ressource/grid-moteur.js` (sans interface, testable) et `Ressource/grid.js` (affichage). Les formes viennent de `Core.load(true)`.
 
 ## Comptes et classements (Firebase)

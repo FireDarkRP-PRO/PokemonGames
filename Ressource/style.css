@@ -98,3 +98,7 @@ textarea{font:inherit;width:100%;padding:.6rem .9rem;border:3px solid var(--text
 .joueur.p0::before{background:var(--rouge)}.joueur.p1::before{background:var(--bleu)}
 .partage{background:#fff;border:3px solid var(--texte);border-radius:.7rem;padding:.6rem;font-size:1.1rem;white-space:pre-wrap;margin:.5rem 0}
 .histo{padding-left:1.2rem;margin:.3rem 0}
+.tous{list-style:none;padding:0;margin:.3rem 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.4rem;max-height:45vh;overflow:auto}
+.tous li{display:flex;flex-direction:column;align-items:center;gap:.1rem;background:#fff;border:2px solid var(--texte);border-radius:.6rem;padding:.2rem;font-size:.7rem;font-weight:700;text-align:center;word-break:break-word}
+.tous li.ici{background:#c9f0d2}
+.tous img{width:56px;height:56px}
