@@ -15,7 +15,10 @@
       ['reflexion-pokedle.html', 'Pokédle', 'Trouve le Pokémon mystère grâce aux indices de chaque proposition.'],
       ['reflexion-plusmoins.html', 'Plus ou moins', 'Le plus lourd, le plus grand, le plus fort.'],
       ['reflexion-types.html', 'Efficacité des types', "Trouve le multiplicateur de dégâts d'une attaque."],
-      ['reflexion-intrus.html', "Quel est l'intrus ?", 'Trois Pokémon partagent un type, pas le quatrième.']]],
+      ['reflexion-intrus.html', "Quel est l'intrus ?", 'Trois Pokémon partagent un type, pas le quatrième.'],
+      ['grid.html?diff=facile', 'Pokémon Grid : Facile', 'Morpion de Pokémon : trouve un Pokémon par case, vole celles de ton adversaire.'],
+      ['grid.html?diff=normal', 'Pokémon Grid : Normal', 'Même jeu, avec des critères plus variés (statut, stade, starter).'],
+      ['grid.html?diff=difficile', 'Pokémon Grid : Difficile', 'Même jeu, avec Méga, Gigamax, formes régionales et cases à Pokémon unique.']]],
     ['Autre', [
       ['autre-shiny.html', 'Lequel est le shiny ?', 'Deux images, une seule est chromatique.'],
       ['autre-quiestce.html', 'Qui est-ce ? Groupe aléatoire', '30 Pokémon tirés au hasard : devine le Pokémon secret de ton adversaire.'],
@@ -29,7 +32,7 @@
   const nom = () => ($('nom').value.trim() || 'Joueur').slice(0, 16);
   const msg = t => $('msg').textContent = t;
   const montrer = id => { for (const s of ['accueil', 'salon', 'menu', 'duel']) $(s).hidden = s !== id; };
-  const jeuId = page => page.replace(/^(deviner|reflexion|autre)-/, '').replace(/\.html$/, '');
+  const jeuId = page => page.replace(/^(deviner|reflexion|autre)-/, '').replace(/\.html.*$/, '');
   Core.surCompte(C => C.ecoute((u, pseudo) => { if (pseudo) $('nom').value = pseudo; })); // pseudo du compte par défaut
 
   // Menu des jeux (même organisation que l'accueil du site).
@@ -77,7 +80,8 @@
       if (etat.manche !== manche && p && PAGES.has(p.page)) {
         manche = etat.manche; pret = false; attente = []; debutVic = etat.victoires.slice();
         const q = new URLSearchParams({ seed: Number(p.seed), duel: 1, moi: moi(), debut: Number(p.debut) ? 1 : 0, n0: etat.noms[0], n1: etat.noms[1] });
-        $('cadre').src = `${p.page}?${q}`;
+        const sep = p.page.includes('?') ? '&' : '?';
+        $('cadre').src = `${p.page}${sep}${q}`;
       }
       if (etat.fini && enregistre !== etat.manche && p && window.Compte) { // résultat du duel sur le compte (si connecté)
         enregistre = etat.manche;

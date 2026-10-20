@@ -8,11 +8,11 @@ service cloud.firestore {
     function pseudoValide(p) { return p is string && p.matches('^[A-Za-z0-9_-]{3,16}$'); }
 
     function jeuSolo(j) {
-      return j in ['silhouette', 'cri', 'pixel', 'description', 'caracteristiques', 'plusmoins', 'types', 'intrus', 'shiny', 'pokedle', 'memory'];
+      return j in ['silhouette', 'cri', 'pixel', 'description', 'caracteristiques', 'plusmoins', 'types', 'intrus', 'shiny', 'pokedle', 'memory', 'grid-facile', 'grid-normal', 'grid-difficile'];
     }
-    function jeuDuel(j) { return jeuSolo(j) || j in ['quiestce', 'quiestce-perso']; }
+    function jeuDuel(j) { return jeuSolo(j) || j in ['quiestce', 'quiestce-perso', 'grid']; }
     // Scores plausibles par partie (nombre d'essais).
-    function scoreMin(j) { return j == 'pokedle' ? 1 : j == 'memory' ? 6 : 10; }
+    function scoreMin(j) { return j == 'pokedle' ? 1 : j == 'memory' ? 6 : j in ['grid-facile', 'grid-normal', 'grid-difficile'] ? 9 : 10; }
     function scoreMax(j) {
       return j in ['silhouette', 'cri', 'pixel', 'description', 'caracteristiques'] ? 40
            : j in ['plusmoins', 'types', 'intrus', 'shiny'] ? 60

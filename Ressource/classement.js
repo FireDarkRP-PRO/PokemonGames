@@ -13,7 +13,7 @@ Core.surCompte(C => {
     });
   };
   async function charger() {
-    const jeu = $('jeu').value, u = C.utilisateur(), duelSeul = jeu.startsWith('quiestce');
+    const jeu = $('jeu').value, u = C.utilisateur(), duelSeul = jeu.startsWith('quiestce') || jeu === 'grid';
     $('solo-bloc').hidden = duelSeul; $('msg').textContent = 'Chargement…';
     try {
       const [solo, duel] = await Promise.all([duelSeul ? [] : C.top(jeu, 'record', 'asc'), C.top(jeu, 'victoires', 'desc')]);

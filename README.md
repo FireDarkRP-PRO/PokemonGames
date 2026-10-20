@@ -25,6 +25,8 @@ Site de mini-jeux Pokémon, 100 % statique, hébergé sur GitHub Pages. Chaque j
 │   ├── pokedle.js              Pokédle
 │   ├── memory.js               Memory
 │   ├── quiestce.js             Qui est-ce ? (duel uniquement)
+│   ├── grid-moteur.js          Pokémon Grid : critères, génération des grilles, règles du duel
+│   ├── grid.js                 Pokémon Grid : interface (solo et duel)
 │   ├── firebase.js             Comptes et statistiques (Firebase)
 │   ├── compte.js               Page « Mon compte »
 │   ├── classement.js           Page « Classements »
@@ -53,7 +55,7 @@ Le script écrit directement dans `Ressource/pokemon.json` (compte quelques minu
 
 À refaire quand de nouveaux Pokémon sortent (par exemple une nouvelle génération). La génération est complète à chaque fois et il n'y a pas de mise à jour automatique.
 
-Pour chaque Pokémon, le fichier contient : numéro, nom français, génération, types, talents, taille, poids, total des stats, description du Pokédex, stade d'évolution, indicateur full évolué (`final`), images (normale et shiny) et cri.
+Pour chaque Pokémon, le fichier contient : numéro, nom français, génération, types, talents, taille, poids, total des stats, description du Pokédex, stade d'évolution, indicateur full évolué (`final`, vrai aussi pour un Pokémon sans évolution), statuts (`legendaire`, `fabuleux`, `bebe`, `starter`), images (normale et shiny) et cri.
 
 Le fichier contient aussi toutes les formes alternatives (Méga, régionales, Gigamax, etc.), chacune comme une entrée à part avec son propre nom, ses types et ses stats. Le champ `forme` donne sa catégorie (`mega`, `primal`, `gmax`, `alola`, `galar`, `hisui`, `paldea` ou `autre`) et `base` le nom du Pokémon de base. Pour un Pokémon de base, `forme` vaut `null`. `id` est unique et `num` est le numéro du Pokédex.
 
@@ -109,6 +111,15 @@ La connexion passe par le serveur public gratuit de [PeerJS](https://peerjs.com)
 ## Sauvegardes
 
 Dans tous les jeux solo, le score est le nombre d'essais : plus il est bas, mieux c'est, et le record est le plus bas obtenu (Deviner : 10 au mieux, une question ratée compte 4 ; jeux à choix : un mauvais choix est éliminé et compte comme un essai ; Pokédle : nombre de propositions, un abandon n'enregistre rien ; Memory : nombre de coups, 6 au mieux). Les records sont stockés dans le `localStorage` du navigateur, via `Core.Store` dans `core.js`. Quand une base de données arrivera (comptes utilisateurs), c'est le seul endroit à modifier.
+
+## Pokémon Grid
+
+Page `main/grid.html` (menu Réflexion). Une grille 3×3 : chaque ligne et colonne a un critère (type, génération, légendaire, fabuleux, stade d'évolution, starter, Méga, Gigamax, forme régionale) et chaque case demande un Pokémon qui valide les deux. Les Méga, Gigamax et formes régionales sont des Pokémon à part entière ; ils héritent de la génération, du stade, du statut starter et légendaire de leur espèce.
+
+- **Difficultés :** Facile (types et générations, au moins 10 Pokémon valides par case), Normal (au moins 3, avec statut, stade et starter), Difficile (au moins 1, avec au moins un critère rare : starter, Méga, Gigamax ou forme régionale).
+- **Solo :** score = nombre d'essais (9 = parfait). Un nom hors liste ou un Pokémon déjà posé est refusé sans coût, retirer un Pokémon est gratuit. La grille est garantie remplissable avec 9 Pokémon différents. La partie est sauvegardée (localStorage), on peut abandonner pour voir une solution (sans score) et copier un résultat en emojis. Un record par difficulté (`grid-facile`, `grid-normal`, `grid-difficile`).
+- **Duel (salon) :** morpion à tour de rôle sur la même grille, 1 min 30 par tour. Un Pokémon valide sur une case libre la prend, sur une case adverse la vole (avec un Pokémon jamais proposé pour cette case). Un Pokémon invalide fait perdre le tour ; un Pokémon déjà posé ou déjà proposé pour la case est refusé sans perdre le tour. Trois cases alignées gagnent ; si la grille est pleine, celui qui a le plus de cases gagne (9 cases : pas d'égalité). Le détail des Pokémon proposés est visible en touchant une case. Pas de score, seulement les victoires (`grid`).
+- **Code :** `Ressource/grid-moteur.js` (sans interface, testable) et `Ressource/grid.js` (affichage). Les formes viennent de `Core.load(true)`.
 
 ## Comptes et classements (Firebase)
 

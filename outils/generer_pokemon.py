@@ -9,6 +9,10 @@ Chaque Pokémon est une entrée, ainsi que chacune de ses formes alternatives
 et un champ "base" (nom du Pokémon de base) ; pour les Pokémon de base, "forme" vaut null.
 "id" est unique (identifiant PokéAPI du Pokémon), "num" est le numéro du Pokédex.
 
+Champs de statut (hérités par les formes) : "legendaire", "fabuleux", "bebe", "starter" (lignée complète d'un
+starter de départ), "final" (pleinement évolué, y compris un Pokémon sans évolution) et "stade" (1, 2, 3...).
+Les formes sans image restent dans le fichier avec "image": null.
+
 Relis ensuite le diff et commit le fichier quand de nouveaux Pokémon sortent.
 """
 import json
@@ -28,6 +32,17 @@ TYPES = {
     'dark': 'Ténèbres', 'steel': 'Acier', 'fairy': 'Fée',
 }
 REGIONS = {'alola': "d'Alola", 'galar': 'de Galar', 'hisui': 'de Hisui', 'paldea': 'de Paldea'}
+# Les 3 starters de départ de chaque génération : leur lignée complète compte comme « starter ».
+STARTERS = {
+    'bulbasaur', 'charmander', 'squirtle', 'chikorita', 'cyndaquil', 'totodile', 'treecko', 'torchic', 'mudkip',
+    'turtwig', 'chimchar', 'piplup', 'snivy', 'tepig', 'oshawott', 'chespin', 'fennekin', 'froakie',
+    'rowlet', 'litten', 'popplio', 'grookey', 'scorbunny', 'sobble', 'sprigatito', 'fuecoco', 'quaxly',
+}
+# Espèces dont une seule forme peut évoluer (les autres formes sont pleinement évoluées) : espèce -> suffixe.
+SEULE_FORME_QUI_EVOLUE = {
+    'farfetchd': 'galar', 'mr-mime': 'galar', 'corsola': 'galar', 'linoone': 'galar',
+    'qwilfish': 'hisui', 'basculin': 'white-striped',
+}
 
 
 def get(url, essais=3):
@@ -48,8 +63,12 @@ def talent_fr(url):
 
 
 def categorie(suffixe):
-    t = suffixe.split('-')[0]
-    return t if t in ('mega', 'primal', 'gmax', *REGIONS) else 'autre'
+    t = suffixe.split('-')
+    if 'gmax' in t:  # y compris « amped-gmax », « single-strike-gmax »...
+        return 'gmax'
+    if t[0] in ('mega', 'primal', *REGIONS) and not ({'zen', 'totem', 'cap'} & set(t)):  # combat, totems, casquettes : « autre »
+        return t[0]
+    return 'autre'
 
 
 def nom_forme(nom, suffixe, form):
@@ -58,6 +77,9 @@ def nom_forme(nom, suffixe, form):
     if fr and fr != nom:
         return fr
     t = suffixe.split('-')
+    if 'gmax' in t:
+        reste = ' '.join(x for x in t if x != 'gmax')
+        return f'{nom} Gigamax' + (f' ({reste})' if reste else '')
     if t[0] == 'mega':
         return f'Méga-{nom}' + (f' {t[1].upper()}' if len(t) > 1 else '')
     if t[0] == 'primal':
@@ -80,6 +102,9 @@ def entree(sp, p, nom, forme=None, base=None, suffixe=None):
         'nom': nom,
         'forme': forme,
         'gen': int(sp['generation']['url'].rstrip('/').split('/')[-1]),
+        'legendaire': bool(sp.get('is_legendary')),
+        'fabuleux': bool(sp.get('is_mythical')),
+        'bebe': bool(sp.get('is_baby')),
         'types': [TYPES.get(t['type']['name'], t['type']['name']) for t in p['types']],
         'talents': [talent_fr(a['ability']['url']) for a in ab],
         'taille': p['height'] / 10,
@@ -111,9 +136,7 @@ def fiches(s):
             continue
         suf = p['name'][len(sp['name']) + 1:] if p['name'].startswith(sp['name'] + '-') else p['name']
         form = get(p['forms'][0]['url']) if p['forms'] else {'names': []}
-        e = entree(sp, p, nom_forme(nom, suf, form), categorie(suf), nom, suf)
-        if e['image']:  # sans image, la forme est inutilisable dans les jeux
-            out.append(e)
+        out.append(entree(sp, p, nom_forme(nom, suf, form), categorie(suf), nom, suf))  # image possiblement null
     return out
 
 
@@ -128,9 +151,13 @@ def main():
     out.sort(key=lambda p: (p['num'], p['id']))
 
     pere = {p['_en']: p['_pere'] for p in out}
+    parents = set(pere.values()) - {None}  # espèces dont au moins une autre évolue
 
     def stade(n):
         return 1 + stade(pere[n]) if pere.get(n) else 1
+
+    def starter(n):  # l'espèce ou l'un de ses ancêtres est un starter de départ
+        return n in STARTERS or (pere.get(n) is not None and starter(pere[n]))
 
     vus = set()
     for p in out:
@@ -140,6 +167,10 @@ def main():
             if p['nom'] in vus:
                 p['nom'] += f" #{p['id']}"
         vus.add(p['nom'])
+        # Full évolué : ne peut plus évoluer (un Pokémon sans évolution l'est aussi).
+        seule = SEULE_FORME_QUI_EVOLUE.get(p['_en'])
+        p['final'] = (p['_suf'] != seule) if seule else p['_en'] not in parents
+        p['starter'] = starter(p['_en'])
         p['stade'] = stade(p.pop('_en'))
         p.pop('_pere')
         p.pop('_suf')

@@ -4,7 +4,7 @@ const Core = (() => {
   const rng = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const pick = (list, n, r) => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); };
-  const load = async () => { const r = await fetch(new URL('pokemon.json', BASE)); if (!r.ok) throw new Error('pokemon.json introuvable'); return (await r.json()).filter(p => !p.forme); }; // formes alternatives ignorées pour l'instant
+  const load = async (formes = false) => { const r = await fetch(new URL('pokemon.json', BASE)); if (!r.ok) throw new Error('pokemon.json introuvable'); const d = await r.json(); return formes ? d : d.filter(p => !p.forme); }; // formes (Méga, Gigamax, régionales…) seulement si formes = true : Pokémon Grid
   // Sauvegarde locale. Seul endroit à changer quand la base de données arrivera.
   const Store = {
     get(k, d) { try { const v = localStorage.getItem('pq:' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },

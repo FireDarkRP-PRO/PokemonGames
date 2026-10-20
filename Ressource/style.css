@@ -82,3 +82,19 @@ textarea{font:inherit;width:100%;padding:.6rem .9rem;border:3px solid var(--text
 .legende li{display:flex;align-items:center;gap:.5rem}
 .pastille{width:1rem;height:1rem;border-radius:50%;border:2px solid var(--texte);flex:none}
 .barre a{color:var(--texte);font-weight:700}
+.grid3{display:grid;grid-template-columns:minmax(64px,.8fr) repeat(3,1fr);gap:.4rem;margin:.8rem 0}
+.ent{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:.85rem;background:var(--jaune);border:3px solid var(--texte);border-radius:.7rem;padding:.3rem;min-height:3rem}
+.case{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;padding:.2rem;background:#fff;color:var(--texte);font-size:.7rem;font-weight:700;word-break:break-word;min-width:0}
+.case img{width:70%;max-width:80px;height:auto;aspect-ratio:1}
+.case.ok{background:#c9f0d2}.case.revele{background:#ffe08a}
+.case.p0{background:#ffd9d4;border-color:var(--rouge)}.case.p1{background:#d6e2ff;border-color:var(--bleu)}
+.sans-image{display:grid;place-items:center;width:2.4rem;height:2.4rem;border:2px dashed var(--gris);border-radius:50%;color:var(--gris);flex:none}
+.modal-boite.large{max-width:420px;width:100%;max-height:90vh;overflow:auto;text-align:left}
+.sugg{list-style:none;padding:0;margin:.4rem 0;display:grid;gap:.3rem}
+.sg{display:flex;align-items:center;gap:.5rem;width:100%;background:#fff;color:var(--texte);padding:.2rem .5rem;text-align:left}
+.sg img{width:40px;height:40px;flex:none}
+.legende-duel{display:flex;gap:1rem;flex-wrap:wrap;font-weight:700}
+.joueur::before{content:"";display:inline-block;width:.9rem;height:.9rem;border-radius:50%;margin-right:.4rem;border:2px solid var(--texte)}
+.joueur.p0::before{background:var(--rouge)}.joueur.p1::before{background:var(--bleu)}
+.partage{background:#fff;border:3px solid var(--texte);border-radius:.7rem;padding:.6rem;font-size:1.1rem;white-space:pre-wrap;margin:.5rem 0}
+.histo{padding-left:1.2rem;margin:.3rem 0}

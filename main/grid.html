@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pokémon Grid – Jeux Pokémon</title><link rel="stylesheet" href="../Ressource/style.css"></head>
+<body><main>
+<a class="retour" href="reflexion.html">Retour à Réflexion</a>
+<h1>Pokémon Grid</h1>
+<p id="statut" class="vic" aria-live="polite">Chargement…</p>
+<section id="choix-diff" class="lobby" hidden>
+<p class="intro">Trouve un Pokémon pour chaque case : il doit respecter à la fois le critère de la ligne et celui de la colonne. Un Pokémon ne peut servir qu'une fois. Ton score est le nombre d'essais : 9 est parfait.</p>
+<div class="saisie"><button type="button" data-diff="facile">Facile</button><button type="button" data-diff="normal">Normal</button><button type="button" data-diff="difficile">Difficile</button></div>
+<div id="reprise" class="saisie"></div>
+</section>
+<section id="jeu" class="lobby" hidden>
+<div class="barre"><span id="infos"></span><span id="temps"></span></div>
+<div id="legende" class="legende-duel" hidden></div>
+<div id="grille" class="grid3"></div>
+<div id="resultat" hidden>
+<p id="bilan" class="final"></p>
+<pre id="partage" class="partage"></pre>
+<div class="saisie"><button id="copier" type="button">Copier le résultat</button></div>
+</div>
+<div id="actions" class="saisie"><button id="abandon" type="button" class="sec">Abandonner</button><button id="nouvelle" type="button" class="sec">Nouvelle partie</button></div>
+<ol id="journal"></ol>
+</section>
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="p-titre" hidden>
+<div class="modal-boite large">
+<p id="p-titre" class="q"></p>
+<div id="p-actuel"></div>
+<p id="p-histo-t" class="note" hidden>Déjà proposés pour cette case :</p>
+<ul id="p-histo" class="histo" hidden></ul>
+<div id="p-saisie"><input id="p-champ" autocomplete="off" placeholder="Nom du Pokémon (ex. Dracaufeu)"><ul id="sugg" class="sugg"></ul></div>
+<p id="p-msg" aria-live="polite"></p>
+<div class="saisie"><button id="p-fermer" type="button" class="sec">Fermer</button></div>
+</div>
+</div>
+</main>
+<script src="../Ressource/core.js"></script><script src="../Ressource/grid-moteur.js"></script><script src="../Ressource/grid.js"></script>
+<script type="module" src="../Ressource/firebase.js"></script>
+</body></html>
