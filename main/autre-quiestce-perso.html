@@ -5,6 +5,7 @@
 <a class="retour" href="../index.html">Retour au menu</a>
 <h1>Qui est-ce ?</h1>
 <p id="statut" class="vic" aria-live="polite">Chargement…</p>
+<div id="secret-bloc" class="secret-bloc" hidden><button id="secret-btn" type="button" aria-label="Agrandir ton Pokémon secret"><img id="secret-img" alt="" width="96" height="96"></button><p id="secret-texte"></p></div>
 <section id="p-groupe" class="lobby" hidden>
 <p class="intro">Choisis 15 Pokémon : ils rejoindront ceux de ton adversaire pour former le groupe de 30.</p>
 <div class="saisie"><input id="ajout" list="noms" autocomplete="off" placeholder="Nom du Pokémon"><button id="ajouter" type="button">Ajouter</button></div>
@@ -19,8 +20,10 @@
 <div class="modal-boite"><img id="modal-img" alt="" width="120" height="120"><p id="modal-titre" class="q"></p><p id="modal-texte"></p>
 <div class="saisie"><button id="modal-ok" type="button">Valider</button><button id="modal-non" type="button" class="sec">Annuler</button></div></div>
 </div>
+<div id="zoom" class="modal zoom-modal" role="dialog" aria-modal="true" aria-labelledby="zoom-titre" hidden>
+<div class="modal-boite zoom-boite"><p id="zoom-titre" class="q"></p><div id="zoom-cadre" class="zoom-cadre"><img id="zoom-img" alt="" width="475" height="475"></div><p class="note">Clique sur l'image pour l'agrandir ou la réduire.</p><div class="saisie"><button id="zoom-fermer" type="button">Fermer</button></div></div>
+</div>
 <section id="p-jeu" class="lobby" hidden>
-<p id="mon-secret"></p>
 <div id="zone-q" hidden>
 <label for="question">Ta question (la réponse sera oui ou non)</label>
 <textarea id="question" rows="2" maxlength="200"></textarea>
@@ -31,7 +34,10 @@
 <div class="saisie"><button id="oui" type="button">Oui</button><button id="non" type="button" class="sec">Non</button></div>
 </div>
 </section>
-<div id="plateau" class="qe-grille" hidden></div>
+<div id="boards" class="qe-boards" hidden>
+<div><h2 class="qe-titre">Ton plateau <span class="note">(🔍 pour zoomer, clic sur une tuile pour la cacher)</span></h2><div id="plateau" class="qe-grille"></div></div>
+<div><h2 id="titre-adv" class="qe-titre"></h2><div id="plateau-adv" class="qe-grille mini"></div></div>
+</div>
 <ol id="journal" hidden></ol>
 </main>
 <script src="../Ressource/core.js"></script><script src="../Ressource/quiestce.js"></script>

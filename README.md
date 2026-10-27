@@ -43,6 +43,10 @@ Site de mini-jeux Pokémon, 100 % statique, hébergé sur GitHub Pages. Chaque j
     └── generer_pokemon.py      Script qui génère pokemon.json
 ```
 
+## Mise en page
+
+Les pages occupent toute la largeur de l'écran (`main` n'a plus de largeur maximale). Dans le salon multijoueur, l'iframe du duel fait presque la hauteur de la fenêtre et le titre de la page est masqué pendant un duel (classe `en-duel` sur `body`, posée par `multi.js`) pour limiter les barres de défilement. En mode duel, les titres des jeux sont réduits (classe `embed`). Les plateaux carrés (Memory, Pokémon Grid) ont une largeur plafonnée selon la hauteur de l'écran, pour ne pas dépasser la fenêtre.
+
 ## Première utilisation : générer `pokemon.json`
 
 Les jeux lisent `Ressource/pokemon.json`. Ce fichier n'est pas fourni : il se génère depuis [PokéAPI](https://pokeapi.co) avec Python 3.8 ou plus (aucune dépendance à installer).
@@ -95,9 +99,15 @@ Mode réservé au multijoueur (grisé sur l'accueil), avec deux tuiles dans le s
 - **Groupe aléatoire** : 30 Pokémon tirés au hasard.
 - **Groupe personnalisé** : chaque joueur ajoute 15 Pokémon (autocomplétion, « Un au hasard » ou « Compléter au hasard »). Les doublons entre les deux sélections sont remplacés au hasard pour garder 30 Pokémon.
 
-Chacun choisit en secret le Pokémon que l'autre doit deviner. Puis, à tour de rôle, le joueur dont c'est le tour écrit une question (réponse par Oui ou Non) ou clique sur « Deviner le Pokémon » pour proposer une tuile, puis valide ou annule dans un popup (idem pour le choix du Pokémon secret). Une mauvaise proposition fait passer la main et cache la tuile. Un clic sur une tuile la cache ou la réaffiche, uniquement pour soi. Les Pokémon secrets ne circulent jamais avant la fin : c'est le joueur concerné qui répond aux propositions.
+Chacun choisit en secret le Pokémon que l'autre doit deviner. Puis, à tour de rôle, le joueur dont c'est le tour écrit une question (réponse par Oui ou Non) ou clique sur « Deviner le Pokémon » pour proposer une tuile, puis valide ou annule dans un popup (idem pour le choix du Pokémon secret). Une mauvaise proposition fait passer la main et cache la tuile. Un clic sur une tuile la cache ou la réaffiche.
 
-Fonctionnement : les deux pages génèrent la même question avec la même graine (`?seed=`), donc seuls les coups circulent. Chaque jeu tourne dans un `iframe` avec `?duel=1` et envoie ses coups au salon, qui les relaie à l'adversaire.
+- **Plateau de l'adversaire en direct :** à côté de ton plateau, un mini-plateau montre les tuiles que l'adversaire a cachées ou réaffichées, en temps réel (message `cache` relayé par le salon). Les tuiles cachées sont donc visibles des deux côtés ; seul le Pokémon secret reste privé.
+- **Zoom :** chaque tuile a un bouton 🔍 qui ouvre l'image en grand (utile pour les questions sur les couleurs). Un clic sur l'image la double, Échap ou un clic à côté ferme. Le zoom fonctionne aussi sur les tuiles cachées.
+- **Ton Pokémon secret :** dès que tu l'as choisi, un bandeau jaune en haut de la page affiche son image et son nom (clic sur l'image pour zoomer).
+
+Les Pokémon secrets ne circulent jamais avant la fin : c'est le joueur concerné qui répond aux propositions.
+
+Fonctionnement : les deux pages génèrent la même question avec la même graine (`?seed=`), donc seuls les coups circulent (pour Qui est-ce ?, aussi les tuiles cachées). Chaque jeu tourne dans un `iframe` avec `?duel=1` et envoie ses coups au salon, qui les relaie à l'adversaire.
 
 La connexion passe par le serveur public gratuit de [PeerJS](https://peerjs.com). Certains réseaux (écoles, entreprises) peuvent bloquer la connexion entre joueurs, et si l'hôte quitte, le salon se ferme.
 

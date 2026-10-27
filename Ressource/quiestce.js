@@ -15,14 +15,33 @@
   let secret = null, advPret = false, phase = perso ? 'groupe' : 'secret';
   let tour = D.tour, sub = 'tour'; // tour : qui pose la question ; sub : tour | reponse | verdict
   let fini = false, resultat = '', modeDeviner = false, choix = null, dernier = null, modalOuvert = false;
+  const advCaches = new Set(), mesCaches = new Set(); // tuiles cachées : les miennes (envoyées en direct) et celles de l'adversaire
   $('noms').innerHTML = pool.map(p => `<option value="${p.nom}">`).join('');
 
   const log = t => { const li = document.createElement('li'); li.textContent = t; $('journal').prepend(li); };
   const monTour = () => phase === 'jeu' && !fini && sub === 'tour' && tour === moi;
   const construire = ids => {
     groupe = ids.map(id => parId.get(id));
-    $('plateau').innerHTML = groupe.map(p => `<button type="button" class="tq" data-id="${p.id}"><img src="${p.image}" alt=""><span>${p.nom}</span></button>`).join('');
+    $('plateau').innerHTML = groupe.map(p => `<div class="tqw"><button type="button" class="tq" data-id="${p.id}"><img src="${p.image}" alt=""><span>${Core.esc(p.nom)}</span></button><button type="button" class="zoom" data-zoom="${p.id}" aria-label="Agrandir ${Core.esc(p.nom)}">🔍</button></div>`).join('');
+    $('plateau-adv').innerHTML = groupe.map(p => `<div class="tqa" data-id="${p.id}" title="${Core.esc(p.nom)}"><img src="${p.image}" alt="${Core.esc(p.nom)}"></div>`).join('');
   };
+  // Cacher / réafficher une de mes tuiles : l'adversaire voit mon plateau en direct (jamais mon Pokémon secret).
+  const setCache = (id, v) => {
+    if (v) mesCaches.add(id); else mesCaches.delete(id);
+    const t = $('plateau').querySelector(`.tq[data-id="${id}"]`); if (t) t.classList.toggle('cache', v);
+    send({ k: 'cache', id, v });
+  };
+  // Zoom sur un Pokémon (grande image, un clic de plus pour doubler la taille).
+  const zoomer = id => {
+    const p = parId.get(id); if (!p) return;
+    $('zoom-img').src = p.image; $('zoom-img').alt = p.nom; $('zoom-titre').textContent = p.nom;
+    $('zoom-cadre').classList.remove('x2'); $('zoom').hidden = false; $('zoom-fermer').focus();
+  };
+  const fermerZoom = () => { $('zoom').hidden = true; };
+  $('zoom-img').onclick = () => $('zoom-cadre').classList.toggle('x2');
+  $('zoom-fermer').onclick = fermerZoom;
+  $('zoom').onclick = e => { if (e.target === $('zoom')) fermerZoom(); };
+  $('secret-btn').onclick = () => { if (secret !== null) zoomer(secret); };
 
   // ----- Groupe -----
   const composer = () => { // mes 15 + ceux de l'adversaire ; doublons remplacés au hasard (même graine des deux côtés)
@@ -68,7 +87,7 @@
   function maj() {
     const jeu = phase === 'jeu', choixSecret = phase === 'secret' && secret === null;
     $('p-groupe').hidden = phase !== 'groupe';
-    $('plateau').hidden = phase === 'groupe';
+    $('boards').hidden = phase === 'groupe';
     $('p-jeu').hidden = $('journal').hidden = !jeu;
     $('zone-q').hidden = !monTour();
     $('zone-r').hidden = !(jeu && !fini && sub === 'reponse' && tour !== moi);
@@ -82,8 +101,16 @@
       if (!modalOuvert) $('modal-ok').focus();
     }
     modalOuvert = ouvert;
-    for (const t of $('plateau').children) { const id = Number(t.dataset.id); t.classList.toggle('sel', id === choix); t.classList.toggle('secret', id === secret); }
-    $('mon-secret').textContent = secret === null ? '' : `Ton Pokémon, que ${D.noms[adv]} doit deviner : ${nomDe(secret)} (entouré en jaune).`;
+    for (const t of $('plateau').querySelectorAll('.tq')) { const id = Number(t.dataset.id); t.classList.toggle('sel', id === choix); t.classList.toggle('secret', id === secret); }
+    for (const t of $('plateau-adv').children) t.classList.toggle('cache', advCaches.has(Number(t.dataset.id)));
+    $('titre-adv').textContent = `Plateau de ${D.noms[adv]} (en direct)`;
+    $('secret-bloc').hidden = secret === null;
+    if (secret !== null) {
+      const sp = parId.get(secret);
+      if ($('secret-img').getAttribute('src') !== sp.image) $('secret-img').src = sp.image;
+      $('secret-img').alt = sp.nom;
+      $('secret-texte').textContent = `Ton Pokémon, que ${D.noms[adv]} doit deviner : ${sp.nom} (entouré en jaune sur ton plateau). Clique sur l'image pour zoomer.`;
+    }
     $('statut').textContent = statut();
   }
   function terminer(g, secretAdv) {
@@ -95,11 +122,13 @@
 
   // ----- Actions du joueur -----
   $('plateau').onclick = e => {
+    const z = e.target.closest('.zoom');
+    if (z) return zoomer(Number(z.dataset.zoom));
     const t = e.target.closest('.tq');
     if (!t || fini) return;
     const id = Number(t.dataset.id);
     if ((phase === 'secret' && secret === null) || (monTour() && modeDeviner)) { choix = id; return maj(); } // un popup demande de valider
-    t.classList.toggle('cache'); // cacher / réafficher une tuile (privé)
+    setCache(id, !mesCaches.has(id)); // cacher / réafficher une tuile (visible en direct par l'adversaire)
   };
   $('modal-ok').onclick = () => {
     if (choix === null) return;
@@ -108,7 +137,11 @@
     maj();
   };
   $('modal-non').onclick = () => { choix = null; maj(); };
-  addEventListener('keydown', e => { if (e.key === 'Escape' && choix !== null) { choix = null; maj(); } });
+  addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('zoom').hidden) return fermerZoom();
+    if (choix !== null) { choix = null; maj(); }
+  });
   $('deviner').onclick = () => { if (!monTour()) return; modeDeviner = !modeDeviner; choix = null; maj(); };
   $('envoyer').onclick = () => {
     const t = $('question').value.trim();
@@ -127,6 +160,7 @@
     if (m.k === 'liste') {
       if (Array.isArray(m.ids) && m.ids.length === TAILLE && new Set(m.ids).size === TAILLE && m.ids.every(id => parId.has(id))) { advListe = m.ids; essaiGroupe(); }
     } else if (m.k === 'pret') { advPret = true; essaiJeu(); }
+    else if (m.k === 'cache') { if (Number.isInteger(m.id) && parId.has(m.id)) { if (m.v) advCaches.add(m.id); else advCaches.delete(m.id); } }
     else if (m.k === 'question' && phase === 'jeu' && sub === 'tour' && tour === adv && typeof m.texte === 'string') {
       const q = m.texte.slice(0, 200); log(`${D.noms[adv]} demande : ${q}`); $('q-recue').textContent = q; sub = 'reponse';
     } else if (m.k === 'rep' && sub === 'reponse' && tour === moi) {
@@ -140,7 +174,7 @@
       if (m.ok) terminer(moi, m.secret);
       else {
         log(`Tu proposes ${nomDe(dernier)} : raté, ce n'est pas son Pokémon.`);
-        const t = $('plateau').querySelector(`[data-id="${dernier}"]`); if (t) t.classList.add('cache');
+        setCache(dernier, true);
         tour = adv; sub = 'tour';
       }
     } else if (m.k === 'revele' && fini && parId.has(m.id)) log(`Le Pokémon de ${D.noms[adv]} était ${nomDe(m.id)}.`);

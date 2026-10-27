@@ -32,7 +32,7 @@
   const moi = () => estHote ? 0 : 1;
   const nom = () => ($('nom').value.trim() || 'Joueur').slice(0, 16);
   const msg = t => $('msg').textContent = t;
-  const montrer = id => { for (const s of ['accueil', 'salon', 'menu', 'duel']) $(s).hidden = s !== id; };
+  const montrer = id => { for (const s of ['accueil', 'salon', 'menu', 'duel']) $(s).hidden = s !== id; document.body.classList.toggle('en-duel', id === 'duel'); };
   const jeuId = page => page.replace(/^(deviner|reflexion|autre)-/, '').replace(/\.html.*$/, '');
   Core.surCompte(C => C.ecoute((u, pseudo) => { if (pseudo) $('nom').value = pseudo; })); // pseudo du compte par défaut
 
