@@ -87,10 +87,10 @@ textarea{font:inherit;width:100%;padding:.6rem .9rem;border:3px solid var(--text
 .legende li{display:flex;align-items:center;gap:.5rem}
 .pastille{width:1rem;height:1rem;border-radius:50%;border:2px solid var(--texte);flex:none}
 .barre a{color:var(--texte);font-weight:700}
-.grid3{display:grid;grid-template-columns:minmax(64px,.8fr) repeat(3,1fr);gap:.4rem;margin:.8rem 0;max-width:max(340px,min(100%,calc((100vh - 22rem)*1.2)));max-width:max(340px,min(100%,calc((100dvh - 22rem)*1.2)))}
-.ent{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:.85rem;background:var(--jaune);border:3px solid var(--texte);border-radius:.7rem;padding:.3rem;min-height:3rem}
-.case{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;padding:.2rem;background:#fff;color:var(--texte);font-size:.7rem;font-weight:700;word-break:break-word;min-width:0}
-.case img{width:70%;max-width:80px;height:auto;aspect-ratio:1}
+.grid3{display:grid;grid-template-columns:minmax(64px,.8fr) repeat(3,1fr);gap:.4rem;margin:.8rem auto;max-width:min(100%,820px)}
+.ent{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:clamp(.85rem,1.4vw,1.1rem);background:var(--jaune);border:3px solid var(--texte);border-radius:.7rem;padding:.3rem;min-height:3rem}
+.case{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;padding:.2rem;background:#fff;color:var(--texte);font-size:clamp(.7rem,1.2vw,.95rem);font-weight:700;word-break:break-word;min-width:0}
+.case img{width:70%;max-width:130px;height:auto;aspect-ratio:1}
 .case.ok{background:#c9f0d2}.case.revele{background:#ffe08a}
 .case.p0{background:#ffd9d4;border-color:var(--rouge)}.case.p1{background:#d6e2ff;border-color:var(--bleu)}
 .sans-image{display:grid;place-items:center;width:2.4rem;height:2.4rem;border:2px dashed var(--gris);border-radius:50%;color:var(--gris);flex:none}
@@ -129,3 +129,14 @@ textarea{font:inherit;width:100%;padding:.6rem .9rem;border:3px solid var(--text
 .zoom-cadre{overflow:auto;max-height:66vh;border:3px solid var(--texte);border-radius:.7rem;background:#fff}
 .zoom-cadre img{display:block;margin:0 auto;width:min(100%,520px);height:auto;cursor:zoom-in}
 .zoom-cadre.x2 img{width:1040px;max-width:none;cursor:zoom-out}
+
+/* Contenu centré sous le titre */
+main{text-align:center}
+h1{text-align:left}
+.retour{display:block;width:fit-content;margin-right:auto;text-align:left}
+.intro,.q,blockquote,.compte-form,.plateau,.plateau.large{margin-left:auto;margin-right:auto}
+.saisie,.barre,.puces,.camembert,.legende-duel,.secret-bloc{justify-content:center}
+.choix{justify-content:center}
+.legende{justify-items:start;text-align:left}
+#journal,#hist,.histo{list-style-position:inside;padding-left:0}
+.embed .grid3{max-width:max(360px,min(100%,calc((100vh - 14rem)*1.25)));max-width:max(360px,min(100%,calc((100dvh - 14rem)*1.25)))}
