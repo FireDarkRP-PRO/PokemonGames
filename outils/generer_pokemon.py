@@ -12,6 +12,8 @@ et un champ "base" (nom du Pokémon de base) ; pour les Pokémon de base, "forme
 Champs de statut (hérités par les formes) : "legendaire", "fabuleux", "bebe", "starter" (lignée complète d'un
 starter de départ), "final" (pleinement évolué, y compris un Pokémon sans évolution) et "stade" (1, 2, 3...).
 Les formes sans image restent dans le fichier avec "image": null.
+"stats" donne les statistiques de base de chaque entrée (pv, atq, def, atqs, defs, vit) ; "total" est leur somme.
+Pokémon Grid s'en sert pour ses critères de statistiques (ex. « Vitesse ≥ 120 »).
 "ligne" est l'identifiant de la famille d'évolution (Salamèche, Reptincel, Dracaufeu et ses formes : même valeur) ;
 le niveau « Expert » de Pokémon Grid s'en sert pour interdire deux Pokémon de la même lignée.
 Chaque forme a aussi un champ "suffixe" (celui de PokéAPI : "rapid-strike", "pom-pom", "totem"...) que Pokémon Grid
@@ -37,6 +39,11 @@ TYPES = {
     'dark': 'Ténèbres', 'steel': 'Acier', 'fairy': 'Fée',
 }
 REGIONS = {'alola': "d'Alola", 'galar': 'de Galar', 'hisui': 'de Hisui', 'paldea': 'de Paldea'}
+# PokéAPI -> clés courtes du champ "stats".
+STATS = {
+    'hp': 'pv', 'attack': 'atq', 'defense': 'def',
+    'special-attack': 'atqs', 'special-defense': 'defs', 'speed': 'vit',
+}
 # Les 3 starters de départ de chaque génération : leur lignée complète compte comme « starter ».
 STARTERS = {
     'bulbasaur', 'charmander', 'squirtle', 'chikorita', 'cyndaquil', 'totodile', 'treecko', 'torchic', 'mudkip',
@@ -134,6 +141,7 @@ def entree(sp, p, nom, forme=None, base=None, suffixe=None):
         'talents': [talent_fr(a['ability']['url']) for a in ab],
         'taille': p['height'] / 10,
         'poids': p['weight'] / 10,
+        'stats': {STATS[x['stat']['name']]: x['base_stat'] for x in p['stats'] if x['stat']['name'] in STATS},
         'total': sum(x['base_stat'] for x in p['stats']),
         # La description du Pokédex n'existe que pour le Pokémon de base.
         'desc': ' '.join(descs[-1]['flavor_text'].replace('\u00ad', '').split()) if descs and not forme else None,
