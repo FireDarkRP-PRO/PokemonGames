@@ -140,3 +140,9 @@ h1{text-align:left}
 .legende{justify-items:start;text-align:left}
 #journal,#hist,.histo{list-style-position:inside;padding-left:0}
 .embed .grid3{max-width:max(360px,min(100%,calc((100vh - 14rem)*1.25)));max-width:max(360px,min(100%,calc((100dvh - 14rem)*1.25)))}
+
+/* Pokémon Grid : grille nettement plus grande (prioritaire sur les règles précédentes) */
+#grille.grid3,.grid3{width:100%!important;max-width:min(100%,960px)!important;margin-left:auto!important;margin-right:auto!important;gap:.6rem!important}
+#grille .case,.grid3 .case{font-size:clamp(.8rem,1.5vw,1.1rem)!important}
+#grille .case img,.grid3 .case img{width:80%!important;max-width:170px!important}
+#grille .ent,.grid3 .ent{font-size:clamp(.9rem,1.6vw,1.25rem)!important;min-height:3.6rem!important}
